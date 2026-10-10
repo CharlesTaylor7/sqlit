@@ -22,7 +22,7 @@ from sqlit.shared.app.startup_profiler import log_step as log_startup_step
 from sqlit.shared.app.startup_profiler import span as startup_span
 from sqlit.shared.app.services import build_app_services
 
-
+__version__ = "i dont care"
 def _get_schema_value_flags() -> set[str]:
     from sqlit.domains.connections.providers.catalog import iter_provider_schemas
 
@@ -490,7 +490,6 @@ def main() -> int:
         connection_url, filtered_argv = _extract_connection_url(filtered_argv)
 
     log_startup_step("cli_parser_start")
-    from sqlit import __version__
     parser = argparse.ArgumentParser(
         prog="sqlit",
         description="A terminal UI for SQL databases",
@@ -1026,7 +1025,3 @@ def _build_temp_connection(args: argparse.Namespace) -> ConnectionConfig | None:
         default_name=f"Temp {schema.display_name}",
         strict=True,
     )
-
-
-if __name__ == "__main__":
-    sys.exit(main())

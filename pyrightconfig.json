@@ -1,7 +1,7 @@
 {
-  "include": ["sqlit"],
+  "include": ["src"],
   "exclude": ["tests", "**/__pycache__", ".venv", "venv"],
-  "pythonVersion": "3.10",
+  "pythonVersion": "3.14",
   "typeCheckingMode": "basic",
   "useLibraryCodeForTypes": true,
   "reportUnusedVariable": "warning",
