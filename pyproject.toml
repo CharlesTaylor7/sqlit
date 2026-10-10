@@ -1,7 +1,6 @@
 [project]
 name = "sqlit"
 version = "0.1.0"
-description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -18,7 +17,14 @@ dependencies = [
 [project.scripts]
 sqlit = "sqlit.cli:main"
 goose = "goose.worker:main"
+gen = "lsp_code_gen.generator:main"
 
 
 [tool.uv]
 package = true
+
+[dependency-groups]
+dev = [
+    "beautifulsoup4>=4.15.0",
+    "requests>=2.32.5",
+]
