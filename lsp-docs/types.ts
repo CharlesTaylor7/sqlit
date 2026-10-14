@@ -51,7 +51,7 @@ interface RequestMessage extends Message {
 	/**
 	 * The method's params.
 	 */
-	params?: array | object;
+	params?: LSPObject; 
 }
 interface ResponseMessage extends Message {
 	/**
@@ -106,7 +106,7 @@ export namespace ErrorCodes {
 	 */
 	export const jsonrpcReservedErrorRangeStart: integer = -32099;
 	/** @deprecated use jsonrpcReservedErrorRangeStart */
-	export const serverErrorStart: integer = jsonrpcReservedErrorRangeStart;
+	export const serverErrorStart: integer = -32099;
 
 	/**
 	 * Error code indicating that a server received a notification or
@@ -123,8 +123,7 @@ export namespace ErrorCodes {
 	 */
 	export const jsonrpcReservedErrorRangeEnd = -32000;
 	/** @deprecated use jsonrpcReservedErrorRangeEnd */
-	export const serverErrorEnd: integer = jsonrpcReservedErrorRangeEnd;
-
+	export const serverErrorEnd: integer = -32000;
 	/**
 	 * This is the start range of LSP reserved error codes.
 	 * It doesn't denote a real error code.
@@ -187,7 +186,7 @@ interface NotificationMessage extends Message {
 	/**
 	 * The notification's params.
 	 */
-	params?: array | object;
+	params?: LSPObject;
 }
 interface CancelParams {
 	/**
@@ -206,13 +205,6 @@ interface ProgressParams<T> {
 	 * The progress data.
 	 */
 	value: T;
-}
-interface HoverParams {
-	textDocument: { uri: string; };
-	position: { line: uinteger; character: uinteger; };
-}
-interface HoverResult {
-	contents: string;
 }
 type DocumentUri = string;
 type URI = string;
@@ -240,7 +232,6 @@ export interface RegularExpressionsClientCapabilities {
 	 */
 	version?: string;
 }
-export const EOL: string[] = ['\n', '\r\n', '\r'];
 interface Position {
 	/**
 	 * Line position in a document (zero-based).
@@ -292,10 +283,6 @@ export namespace PositionEncodingKind {
 	 * encoding-agnostic representation of character offsets.
 	 */
 	export const UTF32: PositionEncodingKind = 'utf-32';
-}
-{
-    start: { line: 5, character: 23 },
-    end : { line: 6, character: 0 }
 }
 interface Range {
 	/**
@@ -412,8 +399,6 @@ export interface RelativePattern {
  * @since 3.17.0
  */
 export type GlobPattern = Pattern | RelativePattern;
-{ language: 'typescript', scheme: 'file' }
-{ language: 'json', pattern: '**/package.json' }
 /**
  * A document filter where `language` is required field.
  */
@@ -1072,7 +1057,7 @@ export interface WorkspaceEdit {
 	 * @since 3.16.0
 	 */
 	changeAnnotations?: {
-		[id: string /* ChangeAnnotationIdentifier */]: ChangeAnnotation;
+		[id: ChangeAnnotationIdentifier]: ChangeAnnotation;
 	};
 }
 export interface WorkspaceEditClientCapabilities {
@@ -1281,16 +1266,6 @@ export interface WorkDoneProgressParams {
 export interface WorkDoneProgressOptions {
 	workDoneProgress?: boolean;
 }
-	/**
-	 * Window specific client capabilities.
-	 */
-	window?: {
-		/**
-		 * Whether client supports server initiated progress using the
-		 * `window/workDoneProgress/create` request.
-		 */
-		workDoneProgress?: boolean;
-	};
 export interface PartialResultParams {
 	/**
 	 * An optional token that a server can use to report partial results (e.g.
@@ -2358,21 +2333,7 @@ export namespace TextDocumentSyncKind {
 }
 
 export type TextDocumentSyncKind = 0 | 1 | 2;
-export interface TextDocumentSyncOptions {
-	/**
-	 * Open and close notifications are sent to the server. If omitted open
-	 * close notifications should not be sent.
-	 */
-	openClose?: boolean;
 
-	/**
-	 * Change notifications are sent to the server. See
-	 * TextDocumentSyncKind.None, TextDocumentSyncKind.Full and
-	 * TextDocumentSyncKind.Incremental. If omitted it defaults to
-	 * TextDocumentSyncKind.None.
-	 */
-	change?: TextDocumentSyncKind;
-}
 interface DidOpenTextDocumentParams {
 	/**
 	 * The document that was opened.
@@ -2649,6 +2610,7 @@ export namespace NotebookCellKind {
 	 */
 	export const Code: 2 = 2;
 }
+export type NotebookCellKind = number
 export interface ExecutionSummary {
 	/**
 	 * A strictly monotonically increasing value
@@ -2761,24 +2723,6 @@ export type NotebookDocumentFilterPattern = {
  */
 export type NotebookDocumentFilter = NotebookDocumentFilterNotebookType |
 	NotebookDocumentFilterScheme | NotebookDocumentFilterPattern;
-{
-	notebook: {
-		scheme: 'file',
-		pattern: '**/books1/**',
-		notebookType: 'jupyter-notebook'
-	},
-	language: 'python'
-}
-{
-	notebookDocumentSync: {
-		notebookSelector: [
-			{
-				notebook: { scheme: 'file', notebookType: 'jupyter-notebook' },
-				cells: [{ language: 'python' }]
-			}
-		]
-	}
-}
 /**
  * Notebook specific client capabilities.
  *
@@ -3474,7 +3418,7 @@ export interface Hover {
 	/**
 	 * The hover's content.
 	 */
-	contents: MarkedString | MarkedString[] | MarkupContent;
+	contents: MarkupContent;
 
 	/**
 	 * An optional range is a range inside a text document
@@ -3482,23 +3426,6 @@ export interface Hover {
 	 */
 	range?: Range;
 }
-/**
- * MarkedString can be used to render human readable text. It is either a
- * markdown string or a code-block that provides a language and a code snippet.
- * The language identifier is semantically equal to the optional language
- * identifier in fenced code blocks in GitHub issues.
- *
- * The pair of a language and a value is an equivalent to markdown:
- * ```${language}
- * ${value}
- * ```
- *
- * Note that markdown strings will be sanitized - that means html will be
- * escaped.
- *
- * @deprecated use MarkupContent instead.
- */
-type MarkedString = string | { language: string; value: string };
 export interface CodeLensClientCapabilities {
 	/**
 	 * Whether code lens supports dynamic registration.
@@ -4064,30 +3991,8 @@ export interface SemanticTokensLegend {
 	 */
 	tokenModifiers: string[];
 }
-{ line: 2, startChar:  5, length: 3, tokenType: "property",
-	tokenModifiers: ["private", "static"]
-},
-{ line: 2, startChar: 10, length: 4, tokenType: "type", tokenModifiers: [] },
-{ line: 5, startChar:  2, length: 7, tokenType: "class", tokenModifiers: [] }
-{
-   tokenTypes: ['property', 'type', 'class'],
-   tokenModifiers: ['private', 'static']
-}
-{ line: 2, startChar:  5, length: 3, tokenType: 0, tokenModifiers: 3 },
-{ line: 2, startChar: 10, length: 4, tokenType: 1, tokenModifiers: 0 },
-{ line: 5, startChar:  2, length: 7, tokenType: 2, tokenModifiers: 0 }
-{ deltaLine: 2, deltaStartChar: 5, length: 3, tokenType: 0, tokenModifiers: 3 },
-{ deltaLine: 0, deltaStartChar: 5, length: 4, tokenType: 1, tokenModifiers: 0 },
-{ deltaLine: 3, deltaStartChar: 2, length: 7, tokenType: 2, tokenModifiers: 0 }
-// 1st token,  2nd token,  3rd token
-[  2,5,3,0,3,  0,5,4,1,0,  3,2,7,2,0 ]
-{ line: 3, startChar:  5, length: 3, tokenType: "property",
-	tokenModifiers: ["private", "static"]
-},
-{ line: 3, startChar: 10, length: 4, tokenType: "type", tokenModifiers: [] },
-{ line: 6, startChar:  2, length: 7, tokenType: "class", tokenModifiers: [] }
-// 1st token,  2nd token,  3rd token
-[  3,5,3,0,3,  0,5,4,1,0,  3,2,7,2,0]
+
+
 interface SemanticTokensClientCapabilities {
 	/**
 	 * Whether the implementation supports dynamic registration. If this is set to
@@ -4494,7 +4399,6 @@ export namespace InlayHintKind {
 }
 
 export type InlayHintKind = 1 | 2;
-textDocument.inlayHint.resolveSupport = { properties: ['label.location'] };
 /**
  * Client workspace capabilities specific to inlay hints.
  *
@@ -5646,12 +5550,6 @@ interface PublishDiagnosticsParams {
 	 */
 	diagnostics: Diagnostic[];
 }
-export type ClientDiagnosticsTagOptions = {
-	/**
-	 * The tags supported by the client.
-	 */
-	valueSet: DiagnosticTag[];
-};
 
 /**
  * Client capabilities specific to diagnostic pull requests.
@@ -5799,7 +5697,7 @@ export interface FullDocumentDiagnosticReport {
 	/**
 	 * A full document diagnostic report.
 	 */
-	kind: DocumentDiagnosticReportKind.Full;
+	kind: typeof DocumentDiagnosticReportKind.Full;
 
 	/**
 	 * An optional result ID. If provided, it will
@@ -5826,7 +5724,7 @@ export interface UnchangedDocumentDiagnosticReport {
 	 * only return `unchanged` if result IDs are
 	 * provided.
 	 */
-	kind: DocumentDiagnosticReportKind.Unchanged;
+	kind: typeof DocumentDiagnosticReportKind.Unchanged;
 
 	/**
 	 * A result ID which will be sent on the next
@@ -6740,10 +6638,6 @@ export interface CodeAction {
 	 */
 	tags?: CodeActionTag[];
 }
-textDocument.codeAction.resolveSupport = { properties: ['edit'] };
-{
-    "title": "Do Foo"
-}
 export interface DocumentColorClientCapabilities {
 	/**
 	 * Whether document color supports dynamic registration.
@@ -7376,7 +7270,6 @@ export interface WorkspaceSymbol {
 	 */
 	data?: LSPAny;
 }
-connection.client.register(DidChangeConfigurationNotification.type, undefined);
 export interface ConfigurationParams {
 	items: ConfigurationItem[];
 }
@@ -7833,8 +7726,9 @@ export type TextDocumentContentOptions = {
  *
  * @since 3.18.0
  */
-export type TextDocumentContentRegistrationOptions = TextDocumentContentOptions &
-	StaticRegistrationOptions;
+export interface TextDocumentContentRegistrationOptions extends TextDocumentContentOptions,
+	StaticRegistrationOptions {}
+
 /**
  * Parameters for the `workspace/textDocumentContent` request.
  *

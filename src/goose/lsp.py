@@ -5,11 +5,9 @@ Uses: LSP version 3.18
 https://microsoft.github.io/language-server-protocol/specifications/lsp/3.18/specification/
 """
 
-from ast import And
 from dataclasses import dataclass
-from typing import Union, Any, Literal, Optional
+from typing import ClassVar, Type, TypedDict, Union, Any, Literal, Optional
 from dataclass_wizard import JSONWizard
-from typing import TYPE_CHECKING
 
 
 @dataclass
@@ -17,7 +15,8 @@ class InitializeParams:
     class Meta(JSONWizard.Meta):
         tag = "initialize"
 
-    workspaceFolders: list[WorkspaceFolder] | None
+    Point2D: ClassVar = TypedDict("", {"xy": int, "y": int, "label": str})
+    workspaceFolders: list[Point2D]
     capabilities: ClientCapabilities
 
 
