@@ -77,7 +77,67 @@ type integer = int
 type uinteger = int
 @dataclass
 class Empty:\n\tpass
+
+
+
+@dataclass
+class NotificationMessage:
+    jsonrpc: Literal["2.0"]
+    method: str
+    """The method to be invoked."""
+    params: LSPObject | None = None
+    """The notification's params."""
+
+
+@dataclass
+class RequestMessage(JSONWizard):
+    """
+    https://www.jsonrpc.org/specification#request_object
+    """
+
+    class Meta(JSONWizard.Meta):
+        tag_key = "method"
+
+    jsonrpc: Literal["2.0"]
+    method: str
+    params: LspParams | None
+    id: str | int | None
+
+
+@dataclass
+class ResponseMessage(JSONWizard):
+    """
+    https://www.jsonrpc.org/specification#response_object
+    """
+
+    jsonrpc: Literal["2.0"]
+    result: LSPAny
+    error: ResponseError | None
+    id: str | int | None
+
+
+@dataclass
+class ResponseError:
+    """
+    https://www.jsonrpc.org/specification#error_object
+    """
+
+    code: ErrorCodes
+    """A number indicating the error type that occurred."""
+    message: str
+    """A string providing a short description of the error."""
+    data: LSPAny | None = None
+    """A primitive or structured value that contains additional
+information about the error. Can be omitted."""
+
 `;
+
+  const exclusion = new Set([
+    "RequestMessage",
+    "ResponseMessage",
+    "ResponseError",
+    "NotificationMessage",
+  ]);
 
   const types = "lsp-docs/types.ts";
   const target = "src/goose/generated.py";
@@ -98,7 +158,7 @@ class Empty:\n\tpass
     if (node?.kind === undefined) return;
     if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
       const dc = processInterface(node);
-      dataClasses[dc.name] = dc;
+      if (!exclusion.has(dc.name)) dataClasses[dc.name] = dc;
     } else if (node.kind == ts.SyntaxKind.TypeAliasDeclaration) {
       const decl = node as ts.TypeAliasDeclaration;
       aliases[decl.name.escapedText as string] = decl;
@@ -129,6 +189,9 @@ class Empty:\n\tpass
   for (const node of Object.values(aliases)) {
     processAlias(handle, node);
   }
+
+  const params = Object.keys(table).join(" | ");
+  fs.writeSync(ctx.fileHandle, `type LspParams = ${params}`);
 }
 
 function toComment(nodesOrText: any) {
