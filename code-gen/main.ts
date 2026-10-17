@@ -101,13 +101,13 @@ class Empty():\n\tpass
   const ast = program.getSourceFile(types)!;
 
   const aliases: Record<string, ts.TypeAliasDeclaration> = {};
-  const interfaces: Record<string, DataClass> = {};
+  const dataClasses: Record<string, DataClass> = {};
   const enums: ts.NamespaceDeclaration[] = [];
   ts.forEachChild(ast, (node) => {
     if (node?.kind === undefined) return;
     if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
       const dc = processInterface(node);
-      interfaces[dc.name] = dc;
+      dataClasses[dc.name] = dc;
     } else if (node.kind == ts.SyntaxKind.TypeAliasDeclaration) {
       const decl = node as ts.TypeAliasDeclaration;
       aliases[decl.name.escapedText as string] = decl;
@@ -119,10 +119,10 @@ class Empty():\n\tpass
   });
   const ctx: Context = {
     fileHandle: handle,
-    dataClasses: interfaces,
+    dataClasses: dataClasses,
     handlers: table,
   };
-  for (const dc of Object.values(interfaces)) {
+  for (const dc of Object.values(dataClasses)) {
     writeDataClass(ctx, dc);
   }
   // reorder dc class fields putting optional last
@@ -140,9 +140,15 @@ class Empty():\n\tpass
   }
 }
 
+function toComment(nodesOrText: any) {
+  if (typeof nodesOrText === "string") return nodesOrText;
+  if (!nodesOrText) return "";
+  return nodesOrText.map((node) => node.text ?? node.name.escapedText).join("");
+}
 function writeDataClass(ctx: Context, dc: DataClass) {
   for (const cls of dc.subclasses) {
-    dc.fields.push(...ctx.dataClasses[cls].fields);
+    const lookup = ctx.dataClasses[cls];
+    dc.fields.push(...lookup.fields);
   }
 
   dc.fields.sort((a, b) =>
@@ -160,14 +166,17 @@ function writeDataClass(ctx: Context, dc: DataClass) {
     fs.writeSync(ctx.fileHandle, `@dataclass\nclass ${dc.name}:\n`);
   }
 
-  const tag = ctx.handlers[dc.name];
-  if (tag) {
+  const handler = ctx.handlers[dc.name];
+  if (handler) {
     fs.writeSync(
       ctx.fileHandle,
-      `\tclass Meta(JSONWizard.Meta): \n\t\ttag = '${tag}'\n`,
+      `\tclass Meta(JSONWizard.Meta): \n\t\ttag = '${handler.method}'\n`,
     );
   } else if (dc.node.jsDoc) {
-    fs.writeSync(ctx.fileHandle, `\t"""${node.jsDoc[0].comment}"""\n`);
+    fs.writeSync(
+      ctx.fileHandle,
+      `\t"""${toComment(dc.node.jsDoc[0].comment)}"""\n`,
+    );
   } else if (!dc.fields.length) {
     fs.writeSync(ctx.fileHandle, `\tpass\n`);
   }
@@ -203,10 +212,10 @@ function writeDataClass(ctx: Context, dc: DataClass) {
 
     fs.writeSync(
       ctx.fileHandle,
-      `\t${field.name === "from" ? "from_" : field}: ${type}${field.optional ? "| None" : ""} ${assignment}\n`,
+      `\t${field.name === "from" ? "from_" : field.name}: ${type}${field.optional ? "| None" : ""} ${assignment}\n`,
     );
     if (field.comment) {
-      fs.writeSync(ctx.fileHandle, `"""${field.comment}"""`);
+      fs.writeSync(ctx.fileHandle, `\t"""${field.comment}"""\n`);
     }
   }
 }
@@ -237,15 +246,17 @@ function processAlias(handle: number, node: ts.TypeAliasDeclaration) {
 function processInterface(node: any): DataClass {
   const name = node?.name?.escapedText;
   const fields: Field[] = [];
-  const subclasses: string[] = node.heritageClauses[0].types.map(
-    (node) => node.expression.escapedText,
-  );
+  const subclasses: string[] = node.heritageClauses
+    ? node.heritageClauses.flatMap((clause) =>
+        clause.types.map((node) => node.expression.escapedText),
+      )
+    : [];
   for (const member of node.members) {
-    let field = member.name?.escapedText;
-    if (!field) {
+    let name = member.name?.escapedText;
+    if (!name) {
       continue;
     }
-    const comment = member.jsDoc[0].comment;
+    const comment = member.jsDoc ? member.jsDoc[0].comment : "";
     const type = member.type;
     const optional = !!member.questionToken;
     fields.push({ name, type, comment, optional });

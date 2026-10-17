@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "gen": "node code-gen/main.js"
+    "gen": "node code-gen/main.ts"
   },
   "keywords": [],
   "author": "",

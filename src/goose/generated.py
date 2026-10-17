@@ -9,140 +9,114 @@ type TODO = Any
 type decimal = float
 type integer = int
 type uinteger = int
-
-
 @dataclass
-class Empty:
-    pass
-
-
+class Empty():
+	pass
 @dataclass
 class Message:
-    jsonrpc: str
-
-
+	jsonrpc: str 
 @dataclass
-class RequestMessage(Message):
-    id: integer | str
-    """The request id."""
-    method: str
-    """The method to be invoked."""
-    params: LSPObject | None = None
-    """The method's params."""
-
-
+class RequestMessage:
+	id: integer | str 
+	"""The request id."""
+	jsonrpc: str 
+	method: str 
+	"""The method to be invoked."""
+	params: LSPObject| None = None
+	"""The method's params."""
 @dataclass
-class ResponseMessage(Message):
-    id: integer | str | None
-    """The request id."""
-    result: LSPAny | None = None
-    """The result of a request. This member is REQUIRED on success.
+class ResponseMessage:
+	id: integer | str | None 
+	"""The request id."""
+	jsonrpc: str 
+	error: ResponseError| None = None
+	"""The error object in case a request fails."""
+	result: LSPAny| None = None
+	"""The result of a request. This member is REQUIRED on success.
 This member MUST NOT exist if there was an error invoking the method."""
-    error: ResponseError | None = None
-    """The error object in case a request fails."""
-
-
 @dataclass
 class ResponseError:
-    code: integer
-    """A number indicating the error type that occurred."""
-    message: str
-    """A string providing a short description of the error."""
-    data: LSPAny | None = None
-    """A primitive or structured value that contains additional
+	code: integer 
+	"""A number indicating the error type that occurred."""
+	message: str 
+	"""A string providing a short description of the error."""
+	data: LSPAny| None = None
+	"""A primitive or structured value that contains additional
 information about the error. Can be omitted."""
-
-
 @dataclass
-class NotificationMessage(Message):
-    method: str
-    """The method to be invoked."""
-    params: LSPObject | None = None
-    """The notification's params."""
-
-
+class NotificationMessage:
+	jsonrpc: str 
+	method: str 
+	"""The method to be invoked."""
+	params: LSPObject| None = None
+	"""The notification's params."""
 @dataclass
 class CancelParams:
-    class Meta(JSONWizard.Meta):
-        tag = "$/cancelRequest"
-
-    id: integer | str
-    """The request id to cancel."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = '$/cancelRequest'
+	id: integer | str 
+	"""The request id to cancel."""
 @dataclass
 class ProgressParams[T]:
-    class Meta(JSONWizard.Meta):
-        tag = "$/progress"
-
-    token: ProgressToken
-    """The progress token provided by the client or server."""
-    value: T
-    """The progress data."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = '$/progress'
+	token: ProgressToken 
+	"""The progress token provided by the client or server."""
+	value: T 
+	"""The progress data."""
 @dataclass
 class RegularExpressionsClientCapabilities:
-    """Client capabilities specific to regular expressions."""
-
-    engine: RegularExpressionEngineKind
-    """The engine's name."""
-    version: str | None = None
-    """The engine's version."""
-
-
+	"""Client capabilities specific to regular expressions."""
+	engine: RegularExpressionEngineKind 
+	"""The engine's name."""
+	version: str| None = None
+	"""The engine's version."""
 @dataclass
 class Position:
-    line: uinteger
-    """Line position in a document (zero-based)."""
-    character: uinteger
-    """Character offset on a line in a document (zero-based). The meaning of this
+	character: uinteger 
+	"""Character offset on a line in a document (zero-based). The meaning of this
 offset is determined by the negotiated `PositionEncodingKind`.
 
 If the character value is greater than the line length it defaults back
 to the line length."""
-
-
+	line: uinteger 
+	"""Line position in a document (zero-based)."""
 @dataclass
 class Range:
-    start: Position
-    """The range's start position."""
-    end: Position
-    """The range's end position."""
-
-
+	end: Position 
+	"""The range's end position."""
+	start: Position 
+	"""The range's start position."""
 @dataclass
 class TextDocumentItem:
-    uri: DocumentUri
-    """The text document's URI."""
-    languageId: str
-    """The text document's language identifier."""
-    version: integer
-    """The version number of this document (it will increase after each
+	languageId: str 
+	"""The text document's language identifier."""
+	text: str 
+	"""The content of the opened text document."""
+	uri: DocumentUri 
+	"""The text document's URI."""
+	version: integer 
+	"""The version number of this document (it will increase after each
 change, including undo/redo)."""
-    text: str
-    """The content of the opened text document."""
-
-
 @dataclass
 class TextDocumentIdentifier:
-    uri: DocumentUri
-    """The text document's URI."""
-
-
+	uri: DocumentUri 
+	"""The text document's URI."""
 @dataclass
-class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    version: integer
-    """The version number of this document.
+class VersionedTextDocumentIdentifier:
+	uri: DocumentUri 
+	"""The text document's URI."""
+	version: integer 
+	"""The version number of this document.
 
 The version number of a document will increase after each change,
 including undo/redo. The number doesn't need to be consecutive."""
-
-
 @dataclass
-class OptionalVersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    version: integer | None
-    """The version number of this document. If an optional versioned text document
+class OptionalVersionedTextDocumentIdentifier:
+	uri: DocumentUri 
+	"""The text document's URI."""
+	version: integer | None 
+	"""The version number of this document. If an optional versioned text document
 identifier is sent from the server to the client and the file is not
 open in the editor (the server has not received an open notification
 before) the server can send `null` to indicate that the version is
@@ -151,316 +125,264 @@ content ownership).
 
 The version number of a document will increase after each change,
 including undo/redo. The number doesn't need to be consecutive."""
-
-
 @dataclass
 class TextDocumentPositionParams:
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    position: Position
-    """The position inside the text document."""
-
-
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
 @dataclass
 class RelativePattern:
-    """A relative pattern is a helper to construct glob patterns that are matched
-    relatively to a base URI. The common value for a `baseUri` is a workspace
-    folder root, but it can be another absolute URI as well."""
-
-    baseUri: WorkspaceFolder | URI
-    """A workspace folder or a base URI to which this pattern will be matched
+	"""A relative pattern is a helper to construct glob patterns that are matched
+relatively to a base URI. The common value for a `baseUri` is a workspace
+folder root, but it can be another absolute URI as well."""
+	baseUri: WorkspaceFolder | URI 
+	"""A workspace folder or a base URI to which this pattern will be matched
 against relatively."""
-    pattern: Pattern
-    """The actual pattern;"""
-
-
+	pattern: Pattern 
+	"""The actual pattern;"""
 @dataclass
 class StringValue:
-    """A string value used as a snippet is a template which allows to insert text
-    and to control the editor cursor when insertion happens.
+	"""A string value used as a snippet is a template which allows to insert text
+and to control the editor cursor when insertion happens.
 
-    A snippet can define tab stops and placeholders with `$1`, `$2`
-    and `${3:foo}`. `$0` defines the final tab stop, it defaults to
-    the end of the snippet. Variables are defined with `$name` and
-    `${name:default value}`."""
-
-    kind: Literal["snippet"]
-    """The kind of string value."""
-    value: str
-    """The snippet string."""
-
-
+A snippet can define tab stops and placeholders with `$1`, `$2`
+and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+the end of the snippet. Variables are defined with `$name` and
+`${name:default value}`."""
+	kind: Literal["snippet"] 
+	"""The kind of string value."""
+	value: str 
+	"""The snippet string."""
 @dataclass
 class TextEdit:
-    range: Range
-    """The range of the text document to be manipulated. To insert
-text into a document, create a range where start === end."""
-    newText: str
-    """The string to be inserted. For delete operations, use an
+	newText: str 
+	"""The string to be inserted. For delete operations, use an
 empty string."""
-
-
+	range: Range 
+	"""The range of the text document to be manipulated. To insert
+text into a document, create a range where start === end."""
 @dataclass
 class ChangeAnnotation:
-    """Additional information that describes document changes."""
-
-    label: str
-    """A human-readable string describing the actual change. The string
+	"""Additional information that describes document changes."""
+	label: str 
+	"""A human-readable string describing the actual change. The string
 is rendered prominently in the user interface."""
-    needsConfirmation: bool | None = None
-    """A flag which indicates that user confirmation is needed
-before applying the change."""
-    description: str | None = None
-    """A human-readable string which is rendered less prominently in
+	description: str| None = None
+	"""A human-readable string which is rendered less prominently in
 the user interface."""
-
-
+	needsConfirmation: bool| None = None
+	"""A flag which indicates that user confirmation is needed
+before applying the change."""
 @dataclass
-class AnnotatedTextEdit(TextEdit):
-    """A special text edit with an additional change annotation."""
-
-    annotationId: ChangeAnnotationIdentifier
-    """The actual annotation identifier."""
-
-
+class AnnotatedTextEdit:
+	"""A special text edit with an additional change annotation."""
+	annotationId: ChangeAnnotationIdentifier 
+	"""The actual annotation identifier."""
+	newText: str 
+	"""The string to be inserted. For delete operations, use an
+empty string."""
+	range: Range 
+	"""The range of the text document to be manipulated. To insert
+text into a document, create a range where start === end."""
 @dataclass
 class SnippetTextEdit:
-    """An interactive text edit."""
-
-    range: Range
-    """The range of the text document to be manipulated."""
-    snippet: StringValue
-    """The snippet to be inserted."""
-    annotationId: ChangeAnnotationIdentifier | None = None
-    """The actual identifier of the snippet edit."""
-
-
+	"""An interactive text edit."""
+	range: Range 
+	"""The range of the text document to be manipulated."""
+	snippet: StringValue 
+	"""The snippet to be inserted."""
+	annotationId: ChangeAnnotationIdentifier| None = None
+	"""The actual identifier of the snippet edit."""
 @dataclass
 class TextDocumentEdit:
-    textDocument: OptionalVersionedTextDocumentIdentifier
-    """The text document to change."""
-    edits: list[TextEdit | AnnotatedTextEdit | SnippetTextEdit]
-    """The edits to be applied."""
-
-
+	edits: list[TextEdit | AnnotatedTextEdit | SnippetTextEdit] 
+	"""The edits to be applied."""
+	textDocument: OptionalVersionedTextDocumentIdentifier 
+	"""The text document to change."""
 @dataclass
 class Location:
-    uri: DocumentUri
-    range: Range
-
-
+	range: Range 
+	uri: DocumentUri 
 @dataclass
 class LocationLink:
-    originSelectionRange: Range | None = None
-    """Span of the origin of this link.
-
-Used as the underlined span for mouse interaction. Defaults to the word
-range at the mouse position."""
-    targetUri: DocumentUri
-    """The target resource identifier of this link."""
-    targetRange: Range
-    """The full target range of this link. If the target is, for example, a
+	targetRange: Range 
+	"""The full target range of this link. If the target is, for example, a
 symbol, then the target range is the range enclosing this symbol not
 including leading/trailing whitespace but everything else like comments.
 This information is typically used to highlight the range in the editor."""
-    targetSelectionRange: Range
-    """The range that should be selected and revealed when this link is being
+	targetSelectionRange: Range 
+	"""The range that should be selected and revealed when this link is being
 followed, e.g., the name of a function. Must be contained by the
 `targetRange`. See also `DocumentSymbol#range`"""
+	targetUri: DocumentUri 
+	"""The target resource identifier of this link."""
+	originSelectionRange: Range| None = None
+	"""Span of the origin of this link.
 
-
+Used as the underlined span for mouse interaction. Defaults to the word
+range at the mouse position."""
 @dataclass
 class Diagnostic:
-    range: Range
-    """The range at which the message applies."""
-    severity: DiagnosticSeverity | None = None
-    """The diagnostic's severity. To avoid interpretation mismatches when a
+	message: str | MarkupContent 
+	"""The diagnostic's message."""
+	range: Range 
+	"""The range at which the message applies."""
+	code: integer | str| None = None
+	"""The diagnostic's code, which might appear in the user interface."""
+	codeDescription: CodeDescription| None = None
+	"""An optional property to describe the error code."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved between a
+`textDocument/publishDiagnostics` notification and
+`textDocument/codeAction` request."""
+	relatedInformation: list[DiagnosticRelatedInformation]| None = None
+	"""An array of related diagnostic information, e.g. when symbol-names within
+a scope collide all definitions can be marked via this property."""
+	severity: DiagnosticSeverity| None = None
+	"""The diagnostic's severity. To avoid interpretation mismatches when a
 server is used with different clients it is highly recommended that
 servers always provide a severity value. If omitted, it’s recommended
 for the client to interpret it as an Error severity."""
-    code: integer | str | None = None
-    """The diagnostic's code, which might appear in the user interface."""
-    codeDescription: CodeDescription | None = None
-    """An optional property to describe the error code."""
-    source: str | None = None
-    """A human-readable string describing the source of this
+	source: str| None = None
+	"""A human-readable string describing the source of this
 diagnostic, e.g. 'typescript' or 'super lint'."""
-    message: str | MarkupContent
-    """The diagnostic's message."""
-    tags: list[DiagnosticTag] | None = None
-    """Additional metadata about the diagnostic."""
-    relatedInformation: list[DiagnosticRelatedInformation] | None = None
-    """An array of related diagnostic information, e.g. when symbol-names within
-a scope collide all definitions can be marked via this property."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved between a
-`textDocument/publishDiagnostics` notification and
-`textDocument/codeAction` request."""
-
-
+	tags: list[DiagnosticTag]| None = None
+	"""Additional metadata about the diagnostic."""
 @dataclass
 class DiagnosticRelatedInformation:
-    """Represents a related message and source code location for a diagnostic.
-    This should be used to point to code locations that cause or are related to
-    a diagnostic, e.g. when duplicating a symbol in a scope."""
-
-    location: Location
-    """The location of this related diagnostic information."""
-    message: str
-    """The message of this related diagnostic information."""
-
-
+	"""Represents a related message and source code location for a diagnostic.
+This should be used to point to code locations that cause or are related to
+a diagnostic, e.g. when duplicating a symbol in a scope."""
+	location: Location 
+	"""The location of this related diagnostic information."""
+	message: str 
+	"""The message of this related diagnostic information."""
 @dataclass
 class CodeDescription:
-    """Structure to capture a description for an error code."""
-
-    href: URI
-    """A URI to open with more information about the diagnostic error."""
-
-
+	"""Structure to capture a description for an error code."""
+	href: URI 
+	"""A URI to open with more information about the diagnostic error."""
 @dataclass
 class Command:
-    title: str
-    """Title of the command, like `save`."""
-    tooltip: str | None = None
-    """An optional tooltip."""
-    command: str
-    """The identifier of the actual command handler."""
-    arguments: list[LSPAny] | None = None
-    """Arguments that the command handler should be
+	command: str 
+	"""The identifier of the actual command handler."""
+	title: str 
+	"""Title of the command, like `save`."""
+	arguments: list[LSPAny]| None = None
+	"""Arguments that the command handler should be
 invoked with."""
-
-
+	tooltip: str| None = None
+	"""An optional tooltip."""
 @dataclass
 class MarkupContent:
-    """A `MarkupContent` literal represents a string value whose content is
-    interpreted based on its kind flag. Currently, the protocol supports
-    `plaintext` and `markdown` as markup kinds.
+	"""A `MarkupContent` literal represents a string value whose content is
+interpreted based on its kind flag. Currently, the protocol supports
+`plaintext` and `markdown` as markup kinds.
 
-    If the kind is `markdown` then the value can contain fenced code blocks like
-    in GitHub issues.
+If the kind is `markdown` then the value can contain fenced code blocks like
+in GitHub issues.
 
-    Here is an example how such a string can be constructed using
-    JavaScript / TypeScript:
-    ```typescript
-    let markdown: MarkdownContent = {
-            kind: MarkupKind.Markdown,
-            value: [
-                    '# Header',
-                    'Some text',
-                    '```typescript',
-                    'someCode();',
-                    '```'
-            ].join('\n')
-    };
-    ```
+Here is an example how such a string can be constructed using
+JavaScript / TypeScript:
+```typescript
+let markdown: MarkdownContent = {
+	kind: MarkupKind.Markdown,
+	value: [
+		'# Header',
+		'Some text',
+		'```typescript',
+		'someCode();',
+		'```'
+	].join('\n')
+};
+```
 
-    *Please Note* that clients might sanitize the returned markdown. A client
-    could decide to remove HTML from the markdown to avoid script execution."""
-
-    kind: MarkupKind
-    """The type of the Markup."""
-    value: str
-    """The content itself."""
-
-
+*Please Note* that clients might sanitize the returned markdown. A client
+could decide to remove HTML from the markdown to avoid script execution."""
+	kind: MarkupKind 
+	"""The type of the Markup."""
+	value: str 
+	"""The content itself."""
 @dataclass
 class MarkdownClientCapabilities:
-    """Client capabilities specific to the used markdown parser."""
-
-    parser: str
-    """The name of the parser."""
-    version: str | None = None
-    """The version of the parser."""
-    allowedTags: list[str] | None = None
-    """A list of HTML tags that the client allows / supports in
+	"""Client capabilities specific to the used markdown parser."""
+	parser: str 
+	"""The name of the parser."""
+	allowedTags: list[str]| None = None
+	"""A list of HTML tags that the client allows / supports in
 Markdown."""
-
-
+	version: str| None = None
+	"""The version of the parser."""
 @dataclass
 class CreateFileOptions:
-    """Options to create a file."""
-
-    overwrite: bool | None = None
-    """Overwrite existing file. Overwrite wins over `ignoreIfExists`."""
-    ignoreIfExists: bool | None = None
-    """Ignore if exists."""
-
-
+	"""Options to create a file."""
+	ignoreIfExists: bool| None = None
+	"""Ignore if exists."""
+	overwrite: bool| None = None
+	"""Overwrite existing file. Overwrite wins over `ignoreIfExists`."""
 @dataclass
 class CreateFile:
-    """Create file operation"""
-
-    kind: Literal["create"]
-    """This is a create operation."""
-    uri: DocumentUri
-    """The resource to create."""
-    options: CreateFileOptions | None = None
-    """Additional options."""
-    annotationId: ChangeAnnotationIdentifier | None = None
-    """An optional annotation identifier describing the operation."""
-
-
+	"""Create file operation"""
+	kind: Literal["create"] 
+	"""This is a create operation."""
+	uri: DocumentUri 
+	"""The resource to create."""
+	annotationId: ChangeAnnotationIdentifier| None = None
+	"""An optional annotation identifier describing the operation."""
+	options: CreateFileOptions| None = None
+	"""Additional options."""
 @dataclass
 class RenameFileOptions:
-    """Rename file options"""
-
-    overwrite: bool | None = None
-    """Overwrite target if existing. Overwrite wins over `ignoreIfExists`."""
-    ignoreIfExists: bool | None = None
-    """Ignores if target exists."""
-
-
+	"""Rename file options"""
+	ignoreIfExists: bool| None = None
+	"""Ignores if target exists."""
+	overwrite: bool| None = None
+	"""Overwrite target if existing. Overwrite wins over `ignoreIfExists`."""
 @dataclass
 class RenameFile:
-    """Rename file operation"""
-
-    kind: Literal["rename"]
-    """This is a rename operation."""
-    oldUri: DocumentUri
-    """The old (existing) location."""
-    newUri: DocumentUri
-    """The new location."""
-    options: RenameFileOptions | None = None
-    """Rename options."""
-    annotationId: ChangeAnnotationIdentifier | None = None
-    """An optional annotation identifier describing the operation."""
-
-
+	"""Rename file operation"""
+	kind: Literal["rename"] 
+	"""This is a rename operation."""
+	newUri: DocumentUri 
+	"""The new location."""
+	oldUri: DocumentUri 
+	"""The old (existing) location."""
+	annotationId: ChangeAnnotationIdentifier| None = None
+	"""An optional annotation identifier describing the operation."""
+	options: RenameFileOptions| None = None
+	"""Rename options."""
 @dataclass
 class DeleteFileOptions:
-    """Delete file options"""
-
-    recursive: bool | None = None
-    """Delete the content recursively if a folder is denoted."""
-    ignoreIfNotExists: bool | None = None
-    """Ignore the operation if the file doesn't exist."""
-
-
+	"""Delete file options"""
+	ignoreIfNotExists: bool| None = None
+	"""Ignore the operation if the file doesn't exist."""
+	recursive: bool| None = None
+	"""Delete the content recursively if a folder is denoted."""
 @dataclass
 class DeleteFile:
-    """Delete file operation"""
-
-    kind: Literal["delete"]
-    """This is a delete operation."""
-    uri: DocumentUri
-    """The file to delete."""
-    options: DeleteFileOptions | None = None
-    """Delete options."""
-    annotationId: ChangeAnnotationIdentifier | None = None
-    """An optional annotation identifier describing the operation."""
-
-
+	"""Delete file operation"""
+	kind: Literal["delete"] 
+	"""This is a delete operation."""
+	uri: DocumentUri 
+	"""The file to delete."""
+	annotationId: ChangeAnnotationIdentifier| None = None
+	"""An optional annotation identifier describing the operation."""
+	options: DeleteFileOptions| None = None
+	"""Delete options."""
 @dataclass
 class WorkspaceEdit:
-    changes: Dict[DocumentUri, list[TextEdit]] | None = None
-    """Holds changes to existing resources."""
-    documentChanges: (
-        list[TextDocumentEdit]
-        | list[TextDocumentEdit | CreateFile | RenameFile | DeleteFile]
-        | None
-    ) = None
-    """Depending on the client capability
+	changeAnnotations: Dict[ChangeAnnotationIdentifier,ChangeAnnotation]| None = None
+	"""A map of change annotations that can be referenced in
+`AnnotatedTextEdit`s or create, rename and delete file / folder
+operations.
+
+Whether clients honor this property depends on the client capability
+`workspace.changeAnnotationSupport`."""
+	changes: Dict[DocumentUri,list[TextEdit]]| None = None
+	"""Holds changes to existing resources."""
+	documentChanges: list[TextDocumentEdit] | list[TextDocumentEdit | CreateFile | RenameFile | DeleteFile]| None = None
+	"""Depending on the client capability
 `workspace.workspaceEdit.resourceOperations` document changes are either
 an array of `TextDocumentEdit`s to express changes to n different text
 documents where each text document edit addresses a specific version of
@@ -473,313 +395,266 @@ Whether a client supports versioned document edits is expressed via
 If a client neither supports `documentChanges` nor
 `workspace.workspaceEdit.resourceOperations` then only plain `TextEdit`s
 using the `changes` property are supported."""
-    changeAnnotations: Dict[ChangeAnnotationIdentifier, ChangeAnnotation] | None = None
-    """A map of change annotations that can be referenced in
-`AnnotatedTextEdit`s or create, rename and delete file / folder
-operations.
-
-Whether clients honor this property depends on the client capability
-`workspace.changeAnnotationSupport`."""
-
-
 @dataclass
 class WorkspaceEditClientCapabilities:
-    documentChanges: bool | None = None
-    """The client supports versioned document changes in `WorkspaceEdit`s."""
-    resourceOperations: list[ResourceOperationKind] | None = None
-    """The resource operations the client supports. Clients should at least
-support 'create', 'rename', and 'delete' for files and folders."""
-    failureHandling: FailureHandlingKind | None = None
-    """The failure handling strategy of a client if applying the workspace edit
+	changeAnnotationSupport: ChangeAnnotationsSupportOptions| None = None
+	"""Whether the client in general supports change annotations on text edits,
+create file, rename file, and delete file changes."""
+	documentChanges: bool| None = None
+	"""The client supports versioned document changes in `WorkspaceEdit`s."""
+	failureHandling: FailureHandlingKind| None = None
+	"""The failure handling strategy of a client if applying the workspace edit
 fails."""
-    normalizesLineEndings: bool | None = None
-    """Whether the client normalizes line endings to the client specific
+	metadataSupport: bool| None = None
+	"""Whether the client supports `WorkspaceEditMetadata` in `WorkspaceEdit`s."""
+	normalizesLineEndings: bool| None = None
+	"""Whether the client normalizes line endings to the client specific
 setting.
 If set to `true`, the client will normalize line ending characters
 in a workspace edit to the client specific new line character(s)."""
-    changeAnnotationSupport: ChangeAnnotationsSupportOptions | None = None
-    """Whether the client in general supports change annotations on text edits,
-create file, rename file, and delete file changes."""
-    metadataSupport: bool | None = None
-    """Whether the client supports `WorkspaceEditMetadata` in `WorkspaceEdit`s."""
-    snippetEditSupport: bool | None = None
-    """Whether the client supports snippets as text edits."""
-
-
+	resourceOperations: list[ResourceOperationKind]| None = None
+	"""The resource operations the client supports. Clients should at least
+support 'create', 'rename', and 'delete' for files and folders."""
+	snippetEditSupport: bool| None = None
+	"""Whether the client supports snippets as text edits."""
 @dataclass
 class WorkDoneProgressBegin:
-    kind: Literal["begin"]
-    title: str
-    """Mandatory title of the progress operation. Used to briefly inform about
+	kind: Literal["begin"] 
+	title: str 
+	"""Mandatory title of the progress operation. Used to briefly inform about
 the kind of operation being performed.
 
 Examples: "Indexing" or "Linking dependencies"."""
-    cancellable: bool | None = None
-    """Controls if a cancel button should be shown to allow the user to cancel
+	cancellable: bool| None = None
+	"""Controls if a cancel button should be shown to allow the user to cancel
 the long running operation. Clients that don't support cancellation are
 allowed to ignore the setting."""
-    message: str | None = None
-    """Optional, more detailed associated progress message. Contains
+	message: str| None = None
+	"""Optional, more detailed associated progress message. Contains
 complementary information to the `title`.
 
 Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
 If unset, the previous progress message (if any) is still valid."""
-    percentage: uinteger | None = None
-    """Optional progress percentage to display (value 100 is considered 100%).
+	percentage: uinteger| None = None
+	"""Optional progress percentage to display (value 100 is considered 100%).
 If not provided infinite progress is assumed and clients are allowed
 to ignore the `percentage` value in subsequent report notifications.
 
 The value should be steadily rising. Clients are free to ignore values
 that are not following this rule. The value range is [0, 100]."""
-
-
 @dataclass
 class WorkDoneProgressReport:
-    kind: Literal["report"]
-    cancellable: bool | None = None
-    """Controls enablement state of a cancel button. This property is only valid
+	kind: Literal["report"] 
+	cancellable: bool| None = None
+	"""Controls enablement state of a cancel button. This property is only valid
 if a cancel button got requested in the `WorkDoneProgressBegin` payload.
 
 Clients that don't support cancellation or don't support controlling the
 button's enablement state are allowed to ignore the setting."""
-    message: str | None = None
-    """Optional, more detailed associated progress message. Contains
+	message: str| None = None
+	"""Optional, more detailed associated progress message. Contains
 complementary information to the `title`.
 
 Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
 If unset, the previous progress message (if any) is still valid."""
-    percentage: uinteger | None = None
-    """Optional progress percentage to display (value 100 is considered 100%).
+	percentage: uinteger| None = None
+	"""Optional progress percentage to display (value 100 is considered 100%).
 If not provided infinite progress is assumed and clients are allowed
 to ignore the `percentage` value in subsequent report notifications.
 
 The value should be steadily rising. Clients are free to ignore values
 that are not following this rule. The value range is [0, 100]."""
-
-
 @dataclass
 class WorkDoneProgressEnd:
-    kind: Literal["end"]
-    message: str | None = None
-    """Optional, a final message indicating, for example,
+	kind: Literal["end"] 
+	message: str| None = None
+	"""Optional, a final message indicating, for example,
   the outcome of the operation."""
-
-
 @dataclass
 class WorkDoneProgressParams:
-    workDoneToken: ProgressToken | None = None
-    """An optional token that a server can use to report work done progress."""
-
-
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class WorkDoneProgressOptions:
-    workDoneProgress: bool | None = None
-
-
+	workDoneProgress: bool| None = None
 @dataclass
 class PartialResultParams:
-    partialResultToken: ProgressToken | None = None
-    """An optional token that a server can use to report partial results (e.g.
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
 streaming) to the client."""
-
-
 @dataclass
-class InitializeParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "initialize"
-
-    processId: integer | None
-    """The process Id of the parent process that started the server. Is null if
+class InitializeParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'initialize'
+	capabilities: ClientCapabilities 
+	"""The capabilities provided by the client (editor or tool)"""
+	processId: integer | None 
+	"""The process Id of the parent process that started the server. Is null if
 the process has not been started by another process. If the parent
 process is not alive then the server should exit (see exit notification)
 its process."""
-    clientInfo: ClientInfo | None = None
-    """Information about the client"""
-    locale: str | None = None
-    """The locale the client is currently showing the user interface
+	rootUri: DocumentUri | None 
+	"""The rootUri of the workspace. Is null if no
+folder is open. If both `rootPath` and `rootUri` are set
+`rootUri` wins."""
+	clientInfo: ClientInfo| None = None
+	"""Information about the client"""
+	initializationOptions: LSPAny| None = None
+	"""User provided initialization options."""
+	locale: str| None = None
+	"""The locale the client is currently showing the user interface
 in. This must not necessarily be the locale of the operating
 system.
 
 Uses IETF language tags as the value's syntax
 (See https://en.wikipedia.org/wiki/IETF_language_tag)"""
-    rootPath: str | None | None = None
-    """The rootPath of the workspace. Is null
+	rootPath: str | None| None = None
+	"""The rootPath of the workspace. Is null
 if no folder is open."""
-    rootUri: DocumentUri | None
-    """The rootUri of the workspace. Is null if no
-folder is open. If both `rootPath` and `rootUri` are set
-`rootUri` wins."""
-    initializationOptions: LSPAny | None = None
-    """User provided initialization options."""
-    capabilities: ClientCapabilities
-    """The capabilities provided by the client (editor or tool)"""
-    trace: TraceValue | None = None
-    """The initial trace setting. If omitted trace is disabled ('off')."""
-    workspaceFolders: list[WorkspaceFolder] | None | None = None
-    """The workspace folders configured in the client when the server starts.
+	trace: TraceValue| None = None
+	"""The initial trace setting. If omitted trace is disabled ('off')."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
+	workspaceFolders: list[WorkspaceFolder] | None| None = None
+	"""The workspace folders configured in the client when the server starts.
 This property is only available if the client supports workspace folders.
 It can be `null` if the client supports workspace folders but none are
 configured."""
-
-
 @dataclass
 class TextDocumentClientCapabilities:
-    """Text document specific client capabilities."""
-
-    synchronization: TextDocumentSyncClientCapabilities | None = None
-    """Defines which synchronization capabilities the client supports."""
-    filters: TextDocumentFilterClientCapabilities | None = None
-    """Defines which filters the client supports."""
-    completion: CompletionClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/completion` request."""
-    hover: HoverClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/hover` request."""
-    signatureHelp: SignatureHelpClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/signatureHelp` request."""
-    declaration: DeclarationClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/declaration` request."""
-    definition: DefinitionClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/definition` request."""
-    typeDefinition: TypeDefinitionClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/typeDefinition` request."""
-    implementation: ImplementationClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/implementation` request."""
-    references: ReferenceClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/references` request."""
-    documentHighlight: DocumentHighlightClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/documentHighlight` request."""
-    documentSymbol: DocumentSymbolClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/documentSymbol` request."""
-    codeAction: CodeActionClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/codeAction` request."""
-    codeLens: CodeLensClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/codeLens` request."""
-    documentLink: DocumentLinkClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/documentLink` request."""
-    colorProvider: DocumentColorClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/documentColor` and the
+	"""Text document specific client capabilities."""
+	callHierarchy: CallHierarchyClientCapabilities| None = None
+	"""Capabilities specific to the various call hierarchy requests."""
+	codeAction: CodeActionClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/codeAction` request."""
+	codeLens: CodeLensClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/codeLens` request."""
+	colorProvider: DocumentColorClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/documentColor` and the
 `textDocument/colorPresentation` request."""
-    formatting: DocumentFormattingClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/formatting` request."""
-    rangeFormatting: DocumentRangeFormattingClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/rangeFormatting` and
-`textDocument/rangesFormatting requests."""
-    onTypeFormatting: DocumentOnTypeFormattingClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/onTypeFormatting` request."""
-    rename: RenameClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/rename` request."""
-    publishDiagnostics: PublishDiagnosticsClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/publishDiagnostics`
+	completion: CompletionClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/completion` request."""
+	declaration: DeclarationClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/declaration` request."""
+	definition: DefinitionClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/definition` request."""
+	diagnostic: DiagnosticClientCapabilities| None = None
+	"""Capabilities specific to the diagnostic pull model."""
+	documentHighlight: DocumentHighlightClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/documentHighlight` request."""
+	documentLink: DocumentLinkClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/documentLink` request."""
+	documentSymbol: DocumentSymbolClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/documentSymbol` request."""
+	filters: TextDocumentFilterClientCapabilities| None = None
+	"""Defines which filters the client supports."""
+	foldingRange: FoldingRangeClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/foldingRange` request."""
+	formatting: DocumentFormattingClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/formatting` request."""
+	hover: HoverClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/hover` request."""
+	implementation: ImplementationClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/implementation` request."""
+	inlayHint: InlayHintClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/inlayHint` request."""
+	inlineCompletion: InlineCompletionClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/inlineCompletion` request."""
+	inlineValue: InlineValueClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/inlineValue` request."""
+	linkedEditingRange: LinkedEditingRangeClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/linkedEditingRange` request."""
+	moniker: MonikerClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/moniker` request."""
+	onTypeFormatting: DocumentOnTypeFormattingClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/onTypeFormatting` request."""
+	publishDiagnostics: PublishDiagnosticsClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/publishDiagnostics`
 notification."""
-    foldingRange: FoldingRangeClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/foldingRange` request."""
-    selectionRange: SelectionRangeClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/selectionRange` request."""
-    linkedEditingRange: LinkedEditingRangeClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/linkedEditingRange` request."""
-    callHierarchy: CallHierarchyClientCapabilities | None = None
-    """Capabilities specific to the various call hierarchy requests."""
-    semanticTokens: SemanticTokensClientCapabilities | None = None
-    """Capabilities specific to the various semantic token requests."""
-    moniker: MonikerClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/moniker` request."""
-    typeHierarchy: TypeHierarchyClientCapabilities | None = None
-    """Capabilities specific to the various type hierarchy requests."""
-    inlineValue: InlineValueClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/inlineValue` request."""
-    inlayHint: InlayHintClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/inlayHint` request."""
-    diagnostic: DiagnosticClientCapabilities | None = None
-    """Capabilities specific to the diagnostic pull model."""
-    inlineCompletion: InlineCompletionClientCapabilities | None = None
-    """Capabilities specific to the `textDocument/inlineCompletion` request."""
-
-
+	rangeFormatting: DocumentRangeFormattingClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/rangeFormatting` and
+`textDocument/rangesFormatting requests."""
+	references: ReferenceClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/references` request."""
+	rename: RenameClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/rename` request."""
+	selectionRange: SelectionRangeClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/selectionRange` request."""
+	semanticTokens: SemanticTokensClientCapabilities| None = None
+	"""Capabilities specific to the various semantic token requests."""
+	signatureHelp: SignatureHelpClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/signatureHelp` request."""
+	synchronization: TextDocumentSyncClientCapabilities| None = None
+	"""Defines which synchronization capabilities the client supports."""
+	typeDefinition: TypeDefinitionClientCapabilities| None = None
+	"""Capabilities specific to the `textDocument/typeDefinition` request."""
+	typeHierarchy: TypeHierarchyClientCapabilities| None = None
+	"""Capabilities specific to the various type hierarchy requests."""
 @dataclass
 class TextDocumentFilterClientCapabilities:
-    relativePatternSupport: bool | None = None
-    """The client supports Relative Patterns."""
-
-
+	relativePatternSupport: bool| None = None
+	"""The client supports Relative Patterns."""
 @dataclass
 class NotebookDocumentClientCapabilities:
-    """Capabilities specific to the notebook document support."""
-
-    synchronization: NotebookDocumentSyncClientCapabilities
-    """Capabilities specific to notebook document synchronization"""
-
-
+	"""Capabilities specific to the notebook document support."""
+	synchronization: NotebookDocumentSyncClientCapabilities 
+	"""Capabilities specific to notebook document synchronization"""
 @dataclass
 class ClientCapabilities:
-    workspace: WorkspaceClientCapabilities | None = None
-    """Workspace specific client capabilities."""
-    textDocument: TextDocumentClientCapabilities | None = None
-    """Text document specific client capabilities."""
-    notebookDocument: NotebookDocumentClientCapabilities | None = None
-    """Capabilities specific to the notebook document support."""
-    window: WindowClientCapabilities | None = None
-    """Window specific client capabilities."""
-    general: GeneralClientCapabilities | None = None
-    """General client capabilities."""
-    experimental: LSPAny | None = None
-    """Experimental client capabilities."""
-
-
+	experimental: LSPAny| None = None
+	"""Experimental client capabilities."""
+	general: GeneralClientCapabilities| None = None
+	"""General client capabilities."""
+	notebookDocument: NotebookDocumentClientCapabilities| None = None
+	"""Capabilities specific to the notebook document support."""
+	textDocument: TextDocumentClientCapabilities| None = None
+	"""Text document specific client capabilities."""
+	window: WindowClientCapabilities| None = None
+	"""Window specific client capabilities."""
+	workspace: WorkspaceClientCapabilities| None = None
+	"""Workspace specific client capabilities."""
 @dataclass
 class FileOperationClientCapabilities:
-    """Capabilities relating to events from file operations by the user in the client.
+	"""Capabilities relating to events from file operations by the user in the client.
 
-    These events do not come from the file system, they come from user operations
-    like renaming a file in the UI."""
-
-    dynamicRegistration: bool | None = None
-    """Whether the client supports dynamic registration for
+These events do not come from the file system, they come from user operations
+like renaming a file in the UI."""
+	didCreate: bool| None = None
+	"""The client has support for sending didCreateFiles notifications."""
+	didDelete: bool| None = None
+	"""The client has support for sending didDeleteFiles notifications."""
+	didRename: bool| None = None
+	"""The client has support for sending didRenameFiles notifications."""
+	dynamicRegistration: bool| None = None
+	"""Whether the client supports dynamic registration for
 file requests/notifications."""
-    didCreate: bool | None = None
-    """The client has support for sending didCreateFiles notifications."""
-    willCreate: bool | None = None
-    """The client has support for sending willCreateFiles requests."""
-    didRename: bool | None = None
-    """The client has support for sending didRenameFiles notifications."""
-    willRename: bool | None = None
-    """The client has support for sending willRenameFiles requests."""
-    didDelete: bool | None = None
-    """The client has support for sending didDeleteFiles notifications."""
-    willDelete: bool | None = None
-    """The client has support for sending willDeleteFiles requests."""
-
-
+	willCreate: bool| None = None
+	"""The client has support for sending willCreateFiles requests."""
+	willDelete: bool| None = None
+	"""The client has support for sending willDeleteFiles requests."""
+	willRename: bool| None = None
+	"""The client has support for sending willRenameFiles requests."""
 @dataclass
 class WindowClientCapabilities:
-    workDoneProgress: bool | None = None
-    """It indicates whether the client supports server initiated
+	showDocument: ShowDocumentClientCapabilities| None = None
+	"""Capabilities specific to the showDocument request."""
+	showMessage: ShowMessageRequestClientCapabilities| None = None
+	"""Capabilities specific to the showMessage request."""
+	workDoneProgress: bool| None = None
+	"""It indicates whether the client supports server initiated
 progress using the `window/workDoneProgress/create` request.
 
 The capability also controls Whether client supports handling
 of progress notifications. If set servers are allowed to report a
 `workDoneProgress` property in the request specific server
 capabilities."""
-    showMessage: ShowMessageRequestClientCapabilities | None = None
-    """Capabilities specific to the showMessage request."""
-    showDocument: ShowDocumentClientCapabilities | None = None
-    """Capabilities specific to the showDocument request."""
-
-
 @dataclass
 class GeneralClientCapabilities:
-    """General client capabilities."""
-
-    staleRequestSupport: StaleRequestSupportOptions | None = None
-    """Client capability that signals how the client
-handles stale requests (e.g. a request
-for which the client will not process the response
-anymore since the information is outdated)."""
-    regularExpressions: RegularExpressionsClientCapabilities | None = None
-    """Client capabilities specific to regular expressions."""
-    markdown: MarkdownClientCapabilities | None = None
-    """Client capabilities specific to the client's markdown parser."""
-    positionEncodings: list[PositionEncodingKind] | None = None
-    """The position encodings supported by the client. Client and server
+	"""General client capabilities."""
+	markdown: MarkdownClientCapabilities| None = None
+	"""Client capabilities specific to the client's markdown parser."""
+	positionEncodings: list[PositionEncodingKind]| None = None
+	"""The position encodings supported by the client. Client and server
 have to agree on the same position encoding to ensure that offsets
 (e.g. character position in a line) are interpreted the same on both
 sides.
@@ -795,272 +670,208 @@ Implementation considerations: since the conversion from one encoding
 into another requires the content of the file / line the conversion
 is best done where the file is read which is usually on the server
 side."""
-
-
+	regularExpressions: RegularExpressionsClientCapabilities| None = None
+	"""Client capabilities specific to regular expressions."""
+	staleRequestSupport: StaleRequestSupportOptions| None = None
+	"""Client capability that signals how the client
+handles stale requests (e.g. a request
+for which the client will not process the response
+anymore since the information is outdated)."""
 @dataclass
 class InitializeResult:
-    capabilities: ServerCapabilities
-    """The capabilities the language server provides."""
-    serverInfo: ServerInfo | None = None
-    """Information about the server."""
-
-
+	capabilities: ServerCapabilities 
+	"""The capabilities the language server provides."""
+	serverInfo: ServerInfo| None = None
+	"""Information about the server."""
 @dataclass
 class InitializeError:
-    retry: bool
-    """Indicates whether the client execute the following retry logic:
+	retry: bool 
+	"""Indicates whether the client execute the following retry logic:
 (1) show the message provided by the ResponseError to the user
 (2) user selects retry or cancel
 (3) if user selected retry the initialize method is sent again."""
-
-
 @dataclass
 class ServerCapabilities:
-    positionEncoding: PositionEncodingKind | None = None
-    """The position encoding the server picked from the encodings offered
+	callHierarchyProvider: bool | CallHierarchyOptions | CallHierarchyRegistrationOptions| None = None
+	"""The server provides call hierarchy support."""
+	codeActionProvider: bool | CodeActionOptions| None = None
+	"""The server provides code actions. The `CodeActionOptions` return type is
+only valid if the client signals code action literal support via the
+property `textDocument.codeAction.codeActionLiteralSupport`."""
+	codeLensProvider: CodeLensOptions| None = None
+	"""The server provides code lens."""
+	colorProvider: bool | DocumentColorOptions | DocumentColorRegistrationOptions| None = None
+	"""The server provides color provider support."""
+	completionProvider: CompletionOptions| None = None
+	"""The server provides completion support."""
+	declarationProvider: bool | DeclarationOptions | DeclarationRegistrationOptions| None = None
+	"""The server provides go to declaration support."""
+	definitionProvider: bool | DefinitionOptions| None = None
+	"""The server provides goto definition support."""
+	diagnosticProvider: DiagnosticOptions | DiagnosticRegistrationOptions| None = None
+	"""The server has support for pull model diagnostics."""
+	documentFormattingProvider: bool | DocumentFormattingOptions| None = None
+	"""The server provides document formatting."""
+	documentHighlightProvider: bool | DocumentHighlightOptions| None = None
+	"""The server provides document highlight support."""
+	documentLinkProvider: DocumentLinkOptions| None = None
+	"""The server provides document link support."""
+	documentOnTypeFormattingProvider: DocumentOnTypeFormattingOptions| None = None
+	"""The server provides document formatting on typing."""
+	documentRangeFormattingProvider: bool | DocumentRangeFormattingOptions| None = None
+	"""The server provides document range formatting."""
+	documentSymbolProvider: bool | DocumentSymbolOptions| None = None
+	"""The server provides document symbol support."""
+	executeCommandProvider: ExecuteCommandOptions| None = None
+	"""The server provides execute command support."""
+	experimental: LSPAny| None = None
+	"""Experimental server capabilities."""
+	foldingRangeProvider: bool | FoldingRangeOptions | FoldingRangeRegistrationOptions| None = None
+	"""The server provides folding provider support."""
+	hoverProvider: bool | HoverOptions| None = None
+	"""The server provides hover support."""
+	implementationProvider: bool | ImplementationOptions | ImplementationRegistrationOptions| None = None
+	"""The server provides goto implementation support."""
+	inlayHintProvider: bool | InlayHintOptions | InlayHintRegistrationOptions| None = None
+	"""The server provides inlay hints."""
+	inlineCompletionProvider: bool | InlineCompletionOptions| None = None
+	"""The server provides inline completions."""
+	inlineValueProvider: bool | InlineValueOptions | InlineValueRegistrationOptions| None = None
+	"""The server provides inline values."""
+	linkedEditingRangeProvider: bool | LinkedEditingRangeOptions | LinkedEditingRangeRegistrationOptions| None = None
+	"""The server provides linked editing range support."""
+	monikerProvider: bool | MonikerOptions | MonikerRegistrationOptions| None = None
+	"""Whether server provides moniker support."""
+	notebookDocumentSync: NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions| None = None
+	"""Defines how notebook documents are synced."""
+	positionEncoding: PositionEncodingKind| None = None
+	"""The position encoding the server picked from the encodings offered
 by the client via the client capability `general.positionEncodings`.
 
 If the client didn't provide any position encodings the only valid
 value that a server can return is 'utf-16'.
 
 If omitted it defaults to 'utf-16'."""
-    textDocumentSync: TextDocumentSyncOptions | TextDocumentSyncKind | None = None
-    """Defines how text documents are synced. Is either a detailed structure
+	referencesProvider: bool | ReferenceOptions| None = None
+	"""The server provides find references support."""
+	renameProvider: bool | RenameOptions| None = None
+	"""The server provides rename support. RenameOptions may only be
+specified if the client states that it supports
+`prepareSupport` in its initial `initialize` request."""
+	selectionRangeProvider: bool | SelectionRangeOptions | SelectionRangeRegistrationOptions| None = None
+	"""The server provides selection range support."""
+	semanticTokensProvider: SemanticTokensOptions | SemanticTokensRegistrationOptions| None = None
+	"""The server provides semantic tokens support."""
+	signatureHelpProvider: SignatureHelpOptions| None = None
+	"""The server provides signature help support."""
+	textDocumentSync: TextDocumentSyncOptions | TextDocumentSyncKind| None = None
+	"""Defines how text documents are synced. Is either a detailed structure
 defining each notification or for backwards compatibility the
 TextDocumentSyncKind number. If omitted it defaults to
 `TextDocumentSyncKind.None`."""
-    notebookDocumentSync: (
-        NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | None
-    ) = None
-    """Defines how notebook documents are synced."""
-    completionProvider: CompletionOptions | None = None
-    """The server provides completion support."""
-    hoverProvider: bool | HoverOptions | None = None
-    """The server provides hover support."""
-    signatureHelpProvider: SignatureHelpOptions | None = None
-    """The server provides signature help support."""
-    declarationProvider: (
-        bool | DeclarationOptions | DeclarationRegistrationOptions | None
-    ) = None
-    """The server provides go to declaration support."""
-    definitionProvider: bool | DefinitionOptions | None = None
-    """The server provides goto definition support."""
-    typeDefinitionProvider: (
-        bool | TypeDefinitionOptions | TypeDefinitionRegistrationOptions | None
-    ) = None
-    """The server provides goto type definition support."""
-    implementationProvider: (
-        bool | ImplementationOptions | ImplementationRegistrationOptions | None
-    ) = None
-    """The server provides goto implementation support."""
-    referencesProvider: bool | ReferenceOptions | None = None
-    """The server provides find references support."""
-    documentHighlightProvider: bool | DocumentHighlightOptions | None = None
-    """The server provides document highlight support."""
-    documentSymbolProvider: bool | DocumentSymbolOptions | None = None
-    """The server provides document symbol support."""
-    codeActionProvider: bool | CodeActionOptions | None = None
-    """The server provides code actions. The `CodeActionOptions` return type is
-only valid if the client signals code action literal support via the
-property `textDocument.codeAction.codeActionLiteralSupport`."""
-    codeLensProvider: CodeLensOptions | None = None
-    """The server provides code lens."""
-    documentLinkProvider: DocumentLinkOptions | None = None
-    """The server provides document link support."""
-    colorProvider: (
-        bool | DocumentColorOptions | DocumentColorRegistrationOptions | None
-    ) = None
-    """The server provides color provider support."""
-    documentFormattingProvider: bool | DocumentFormattingOptions | None = None
-    """The server provides document formatting."""
-    documentRangeFormattingProvider: bool | DocumentRangeFormattingOptions | None = None
-    """The server provides document range formatting."""
-    documentOnTypeFormattingProvider: DocumentOnTypeFormattingOptions | None = None
-    """The server provides document formatting on typing."""
-    renameProvider: bool | RenameOptions | None = None
-    """The server provides rename support. RenameOptions may only be
-specified if the client states that it supports
-`prepareSupport` in its initial `initialize` request."""
-    foldingRangeProvider: (
-        bool | FoldingRangeOptions | FoldingRangeRegistrationOptions | None
-    ) = None
-    """The server provides folding provider support."""
-    executeCommandProvider: ExecuteCommandOptions | None = None
-    """The server provides execute command support."""
-    selectionRangeProvider: (
-        bool | SelectionRangeOptions | SelectionRangeRegistrationOptions | None
-    ) = None
-    """The server provides selection range support."""
-    linkedEditingRangeProvider: (
-        bool | LinkedEditingRangeOptions | LinkedEditingRangeRegistrationOptions | None
-    ) = None
-    """The server provides linked editing range support."""
-    callHierarchyProvider: (
-        bool | CallHierarchyOptions | CallHierarchyRegistrationOptions | None
-    ) = None
-    """The server provides call hierarchy support."""
-    semanticTokensProvider: (
-        SemanticTokensOptions | SemanticTokensRegistrationOptions | None
-    ) = None
-    """The server provides semantic tokens support."""
-    monikerProvider: bool | MonikerOptions | MonikerRegistrationOptions | None = None
-    """Whether server provides moniker support."""
-    typeHierarchyProvider: (
-        bool | TypeHierarchyOptions | TypeHierarchyRegistrationOptions | None
-    ) = None
-    """The server provides type hierarchy support."""
-    inlineValueProvider: (
-        bool | InlineValueOptions | InlineValueRegistrationOptions | None
-    ) = None
-    """The server provides inline values."""
-    inlayHintProvider: bool | InlayHintOptions | InlayHintRegistrationOptions | None = (
-        None
-    )
-    """The server provides inlay hints."""
-    diagnosticProvider: DiagnosticOptions | DiagnosticRegistrationOptions | None = None
-    """The server has support for pull model diagnostics."""
-    workspaceSymbolProvider: bool | WorkspaceSymbolOptions | None = None
-    """The server provides workspace symbol support."""
-    inlineCompletionProvider: bool | InlineCompletionOptions | None = None
-    """The server provides inline completions."""
-    workspace: WorkspaceOptions | None = None
-    """Workspace specific server capabilities"""
-    experimental: LSPAny | None = None
-    """Experimental server capabilities."""
-
-
+	typeDefinitionProvider: bool | TypeDefinitionOptions | TypeDefinitionRegistrationOptions| None = None
+	"""The server provides goto type definition support."""
+	typeHierarchyProvider: bool | TypeHierarchyOptions | TypeHierarchyRegistrationOptions| None = None
+	"""The server provides type hierarchy support."""
+	workspace: WorkspaceOptions| None = None
+	"""Workspace specific server capabilities"""
+	workspaceSymbolProvider: bool | WorkspaceSymbolOptions| None = None
+	"""The server provides workspace symbol support."""
 @dataclass
 class FileOperationOptions:
-    """Options for notifications/requests for user operations on files."""
-
-    didCreate: FileOperationRegistrationOptions | None = None
-    """The server is interested in receiving didCreateFiles notifications."""
-    willCreate: FileOperationRegistrationOptions | None = None
-    """The server is interested in receiving willCreateFiles requests."""
-    didRename: FileOperationRegistrationOptions | None = None
-    """The server is interested in receiving didRenameFiles notifications."""
-    willRename: FileOperationRegistrationOptions | None = None
-    """The server is interested in receiving willRenameFiles requests."""
-    didDelete: FileOperationRegistrationOptions | None = None
-    """The server is interested in receiving didDeleteFiles file notifications."""
-    willDelete: FileOperationRegistrationOptions | None = None
-    """The server is interested in receiving willDeleteFiles file requests."""
-
-
+	"""Options for notifications/requests for user operations on files."""
+	didCreate: FileOperationRegistrationOptions| None = None
+	"""The server is interested in receiving didCreateFiles notifications."""
+	didDelete: FileOperationRegistrationOptions| None = None
+	"""The server is interested in receiving didDeleteFiles file notifications."""
+	didRename: FileOperationRegistrationOptions| None = None
+	"""The server is interested in receiving didRenameFiles notifications."""
+	willCreate: FileOperationRegistrationOptions| None = None
+	"""The server is interested in receiving willCreateFiles requests."""
+	willDelete: FileOperationRegistrationOptions| None = None
+	"""The server is interested in receiving willDeleteFiles file requests."""
+	willRename: FileOperationRegistrationOptions| None = None
+	"""The server is interested in receiving willRenameFiles requests."""
 @dataclass
 class InitializedParams:
-    class Meta(JSONWizard.Meta):
-        tag = "initialized"
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'initialized'
 @dataclass
 class Registration:
-    """General parameters to register for a capability."""
-
-    id: str
-    """The id used to register the request. The id can be used to deregister
+	"""General parameters to register for a capability."""
+	id: str 
+	"""The id used to register the request. The id can be used to deregister
 the request again."""
-    method: str
-    """The method / capability to register for."""
-    registerOptions: LSPAny | None = None
-    """Options necessary for the registration."""
-
-
+	method: str 
+	"""The method / capability to register for."""
+	registerOptions: LSPAny| None = None
+	"""Options necessary for the registration."""
 @dataclass
 class RegistrationParams:
-    class Meta(JSONWizard.Meta):
-        tag = "client/registerCapability"
-
-    registrations: list[Registration]
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'client/registerCapability'
+	registrations: list[Registration] 
 @dataclass
 class StaticRegistrationOptions:
-    """Static registration options to be returned in the initialize request."""
-
-    id: str | None = None
-    """The id used to register the request. The id can be used to deregister
+	"""Static registration options to be returned in the initialize request."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
 the request again. See also Registration#id."""
-
-
 @dataclass
 class TextDocumentRegistrationOptions:
-    """General text document registration options."""
-
-    documentSelector: DocumentSelector | None
-    """A document selector to identify the scope of the registration. If set to
+	"""General text document registration options."""
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
 null, the document selector provided on the client side will be used."""
-
-
 @dataclass
 class Unregistration:
-    """General parameters to unregister a capability."""
-
-    id: str
-    """The id used to unregister the request or notification. Usually an id
+	"""General parameters to unregister a capability."""
+	id: str 
+	"""The id used to unregister the request or notification. Usually an id
 provided during the register request."""
-    method: str
-    """The method / capability to unregister for."""
-
-
+	method: str 
+	"""The method / capability to unregister for."""
 @dataclass
 class UnregistrationParams:
-    class Meta(JSONWizard.Meta):
-        tag = "client/unregisterCapability"
-
-    unregisterations: list[Unregistration]
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'client/unregisterCapability'
+	unregisterations: list[Unregistration] 
 @dataclass
 class SetTraceParams:
-    class Meta(JSONWizard.Meta):
-        tag = "$/setTrace"
-
-    value: TraceValue
-    """The new value that should be assigned to the trace setting."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = '$/setTrace'
+	value: TraceValue 
+	"""The new value that should be assigned to the trace setting."""
 @dataclass
 class LogTraceParams:
-    class Meta(JSONWizard.Meta):
-        tag = "$/logTrace"
-
-    message: str
-    """The message to be logged."""
-    verbose: str | None = None
-    """Additional information that can be computed if the `trace` configuration
+	class Meta(JSONWizard.Meta): 
+		tag = '$/logTrace'
+	message: str 
+	"""The message to be logged."""
+	verbose: str| None = None
+	"""Additional information that can be computed if the `trace` configuration
 is set to `'verbose'`."""
-
-
 @dataclass
 class DidOpenTextDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/didOpen"
-
-    textDocument: TextDocumentItem
-    """The document that was opened."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/didOpen'
+	textDocument: TextDocumentItem 
+	"""The document that was opened."""
 @dataclass
-class TextDocumentChangeRegistrationOptions(TextDocumentRegistrationOptions):
-    """Describe options to be used when registering for text document change events."""
-
-    syncKind: TextDocumentSyncKind
-    """How documents are synced to the server. See TextDocumentSyncKind.Full
+class TextDocumentChangeRegistrationOptions:
+	"""Describe options to be used when registering for text document change events."""
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	syncKind: TextDocumentSyncKind 
+	"""How documents are synced to the server. See TextDocumentSyncKind.Full
 and TextDocumentSyncKind.Incremental."""
-
-
 @dataclass
 class DidChangeTextDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/didChange"
-
-    textDocument: VersionedTextDocumentIdentifier
-    """The document that did change. The version number points
-to the version after all provided content changes have
-been applied."""
-    contentChanges: list[TextDocumentContentChangeEvent]
-    """The actual content changes. The content changes describe single state
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/didChange'
+	contentChanges: list[TextDocumentContentChangeEvent] 
+	"""The actual content changes. The content changes describe single state
 changes to the document. So if there are two content changes c1 (at
 array index 0) and c2 (at array index 1) for a document in state S then
 c1 moves the document from S to S' and c2 from S' to S''. So c1 is
@@ -1073,218 +884,184 @@ approach:
   receive them.
 - apply the `TextDocumentContentChangeEvent`s in a single notification
   in the order you receive them."""
-
-
+	textDocument: VersionedTextDocumentIdentifier 
+	"""The document that did change. The version number points
+to the version after all provided content changes have
+been applied."""
 @dataclass
 class WillSaveTextDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/willSaveWaitUntil"
-
-    textDocument: TextDocumentIdentifier
-    """The document that will be saved."""
-    reason: TextDocumentSaveReason
-    """The 'TextDocumentSaveReason'."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/willSaveWaitUntil'
+	reason: TextDocumentSaveReason 
+	"""The 'TextDocumentSaveReason'."""
+	textDocument: TextDocumentIdentifier 
+	"""The document that will be saved."""
 @dataclass
 class SaveOptions:
-    includeText: bool | None = None
-    """The client is supposed to include the content on save."""
-
-
+	includeText: bool| None = None
+	"""The client is supposed to include the content on save."""
 @dataclass
-class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
-    includeText: bool | None = None
-    """The client is supposed to include the content on save."""
-
-
+class TextDocumentSaveRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	includeText: bool| None = None
+	"""The client is supposed to include the content on save."""
 @dataclass
 class DidSaveTextDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/didSave"
-
-    textDocument: TextDocumentIdentifier
-    """The document that was saved."""
-    text: str | None = None
-    """Optional the content when saved. Depends on the includeText value
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/didSave'
+	textDocument: TextDocumentIdentifier 
+	"""The document that was saved."""
+	text: str| None = None
+	"""Optional the content when saved. Depends on the includeText value
 when the save notification was requested."""
-
-
 @dataclass
 class DidCloseTextDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/didClose"
-
-    textDocument: TextDocumentIdentifier
-    """The document that was closed."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/didClose'
+	textDocument: TextDocumentIdentifier 
+	"""The document that was closed."""
 @dataclass
 class TextDocumentSyncClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether text document synchronization supports dynamic registration."""
-    willSave: bool | None = None
-    """The client supports sending will save notifications."""
-    willSaveWaitUntil: bool | None = None
-    """The client supports sending a will save request and
+	didSave: bool| None = None
+	"""The client supports did save notifications."""
+	dynamicRegistration: bool| None = None
+	"""Whether text document synchronization supports dynamic registration."""
+	willSave: bool| None = None
+	"""The client supports sending will save notifications."""
+	willSaveWaitUntil: bool| None = None
+	"""The client supports sending a will save request and
 waits for a response providing text edits which will
 be applied to the document before it is saved."""
-    didSave: bool | None = None
-    """The client supports did save notifications."""
-
-
 @dataclass
 class TextDocumentSyncOptions:
-    openClose: bool | None = None
-    """Open and close notifications are sent to the server. If omitted open
-close notification should not be sent."""
-    change: TextDocumentSyncKind | None = None
-    """Change notifications are sent to the server. See
+	change: TextDocumentSyncKind| None = None
+	"""Change notifications are sent to the server. See
 TextDocumentSyncKind.None, TextDocumentSyncKind.Full and
 TextDocumentSyncKind.Incremental. If omitted it defaults to
 TextDocumentSyncKind.None."""
-    willSave: bool | None = None
-    """If present will save notifications are sent to the server. If omitted
-the notification should not be sent."""
-    willSaveWaitUntil: bool | None = None
-    """If present will save wait until requests are sent to the server. If
-omitted the request should not be sent."""
-    save: bool | SaveOptions | None = None
-    """If present save notifications are sent to the server. If omitted the
+	openClose: bool| None = None
+	"""Open and close notifications are sent to the server. If omitted open
+close notification should not be sent."""
+	save: bool | SaveOptions| None = None
+	"""If present save notifications are sent to the server. If omitted the
 notification should not be sent."""
-
-
+	willSave: bool| None = None
+	"""If present will save notifications are sent to the server. If omitted
+the notification should not be sent."""
+	willSaveWaitUntil: bool| None = None
+	"""If present will save wait until requests are sent to the server. If
+omitted the request should not be sent."""
 @dataclass
 class NotebookDocument:
-    """A notebook document."""
-
-    uri: URI
-    """The notebook document's URI."""
-    notebookType: str
-    """The type of the notebook."""
-    version: integer
-    """The version number of this document (it will increase after each
+	"""A notebook document."""
+	cells: list[NotebookCell] 
+	"""The cells of a notebook."""
+	notebookType: str 
+	"""The type of the notebook."""
+	uri: URI 
+	"""The notebook document's URI."""
+	version: integer 
+	"""The version number of this document (it will increase after each
 change, including undo/redo)."""
-    metadata: LSPObject | None = None
-    """Additional metadata stored with the notebook
+	metadata: LSPObject| None = None
+	"""Additional metadata stored with the notebook
 document."""
-    cells: list[NotebookCell]
-    """The cells of a notebook."""
-
-
 @dataclass
 class NotebookCell:
-    """A notebook cell.
+	"""A notebook cell.
 
-    A cell's document URI must be unique across ALL notebook
-    cells and can therefore be used to uniquely identify a
-    notebook cell or the cell's text document."""
-
-    kind: NotebookCellKind
-    """The cell's kind."""
-    document: DocumentUri
-    """The URI of the cell's text document
+A cell's document URI must be unique across ALL notebook
+cells and can therefore be used to uniquely identify a
+notebook cell or the cell's text document."""
+	document: DocumentUri 
+	"""The URI of the cell's text document
 content."""
-    metadata: LSPObject | None = None
-    """Additional metadata stored with the cell."""
-    executionSummary: ExecutionSummary | None = None
-    """Additional execution summary information
+	kind: NotebookCellKind 
+	"""The cell's kind."""
+	executionSummary: ExecutionSummary| None = None
+	"""Additional execution summary information
 if supported by the client."""
-
-
+	metadata: LSPObject| None = None
+	"""Additional metadata stored with the cell."""
 @dataclass
 class ExecutionSummary:
-    executionOrder: uinteger
-    """A strictly monotonically increasing value
+	executionOrder: uinteger 
+	"""A strictly monotonically increasing value
 indicating the execution order of a cell
 inside a notebook."""
-    success: bool | None = None
-    """Whether the execution was successful or
+	success: bool| None = None
+	"""Whether the execution was successful or
 not if known by the client."""
-
-
 @dataclass
 class NotebookCellTextDocumentFilter:
-    """A notebook cell text document filter denotes a cell text
-    document by different properties."""
-
-    notebook: str | NotebookDocumentFilter
-    """A filter that matches against the notebook
+	"""A notebook cell text document filter denotes a cell text
+document by different properties."""
+	notebook: str | NotebookDocumentFilter 
+	"""A filter that matches against the notebook
 containing the notebook cell. If a string
 value is provided, it matches against the
 notebook type. '*' matches every notebook."""
-    language: str | None = None
-    """A language ID like `python`.
+	language: str| None = None
+	"""A language ID like `python`.
 
 Will be matched against the language ID of the
 notebook cell document. '*' matches every language."""
-
-
 @dataclass
 class NotebookDocumentSyncClientCapabilities:
-    """Notebook specific client capabilities."""
-
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration. If this is
+	"""Notebook specific client capabilities."""
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration. If this is
 set to `true`, the client supports the new
 `(NotebookDocumentSyncRegistrationOptions & NotebookDocumentSyncOptions)`
 return value for the corresponding server capability as well."""
-    executionSummarySupport: bool | None = None
-    """The client supports sending execution summary data per cell."""
-
-
+	executionSummarySupport: bool| None = None
+	"""The client supports sending execution summary data per cell."""
 @dataclass
 class NotebookDocumentSyncOptions:
-    """Options specific to a notebook plus its cells
-    to be synced to the server.
+	"""Options specific to a notebook plus its cells
+to be synced to the server.
 
-    If a selector provides a notebook document
-    filter but no cell selector, all cells of a
-    matching notebook document will be synced.
+If a selector provides a notebook document
+filter but no cell selector, all cells of a
+matching notebook document will be synced.
 
-    If a selector provides no notebook document
-    filter but only a cell selector, all notebook
-    documents that contain at least one matching
-    cell will be synced."""
-
-    notebookSelector: list[
-        NotebookDocumentFilterWithNotebook | NotebookDocumentFilterWithCells
-    ]
-    """The notebooks to be synced"""
-    save: bool | None = None
-    """Whether save notifications should be forwarded to
+If a selector provides no notebook document
+filter but only a cell selector, all notebook
+documents that contain at least one matching
+cell will be synced."""
+	notebookSelector: list[NotebookDocumentFilterWithNotebook | NotebookDocumentFilterWithCells] 
+	"""The notebooks to be synced"""
+	save: bool| None = None
+	"""Whether save notifications should be forwarded to
 the server. Will only be honored if mode === `notebook`."""
-
-
 @dataclass
-class NotebookDocumentSyncRegistrationOptions(
-    NotebookDocumentSyncOptions, StaticRegistrationOptions
-):
-    """Registration options specific to a notebook."""
-
-
+class NotebookDocumentSyncRegistrationOptions:
+	"""Registration options specific to a notebook."""
+	notebookSelector: list[NotebookDocumentFilterWithNotebook | NotebookDocumentFilterWithCells] 
+	"""The notebooks to be synced"""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	save: bool| None = None
+	"""Whether save notifications should be forwarded to
+the server. Will only be honored if mode === `notebook`."""
 @dataclass
 class DidOpenNotebookDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "notebookDocument/didOpen"
-
-    notebookDocument: NotebookDocument
-    """The notebook document that got opened."""
-    cellTextDocuments: list[TextDocumentItem]
-    """The text documents that represent the content
+	class Meta(JSONWizard.Meta): 
+		tag = 'notebookDocument/didOpen'
+	cellTextDocuments: list[TextDocumentItem] 
+	"""The text documents that represent the content
 of a notebook cell."""
-
-
+	notebookDocument: NotebookDocument 
+	"""The notebook document that got opened."""
 @dataclass
 class DidChangeNotebookDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "notebookDocument/didChange"
-
-    notebookDocument: VersionedNotebookDocumentIdentifier
-    """The notebook document that did change. The version number points
-to the version after all provided changes have been applied."""
-    change: NotebookDocumentChangeEvent
-    """The actual changes to the notebook document.
+	class Meta(JSONWizard.Meta): 
+		tag = 'notebookDocument/didChange'
+	change: NotebookDocumentChangeEvent 
+	"""The actual changes to the notebook document.
 
 The change describes a single state change to the notebook document,
 so it moves a notebook document, its cells and its cell text document
@@ -1295,758 +1072,730 @@ following approach:
 - start with the same initial content
 - apply the 'notebookDocument/didChange' notifications in the order
   you receive them."""
-
-
+	notebookDocument: VersionedNotebookDocumentIdentifier 
+	"""The notebook document that did change. The version number points
+to the version after all provided changes have been applied."""
 @dataclass
 class VersionedNotebookDocumentIdentifier:
-    """A versioned notebook document identifier."""
-
-    version: integer
-    """The version number of this notebook document."""
-    uri: URI
-    """The notebook document's URI."""
-
-
+	"""A versioned notebook document identifier."""
+	uri: URI 
+	"""The notebook document's URI."""
+	version: integer 
+	"""The version number of this notebook document."""
 @dataclass
 class NotebookDocumentChangeEvent:
-    """A change event for a notebook document."""
-
-    metadata: LSPObject | None = None
-    """The changed meta data if any."""
-    cells: NotebookDocumentCellChanges | None = None
-    """Changes to cells."""
-
-
+	"""A change event for a notebook document."""
+	cells: NotebookDocumentCellChanges| None = None
+	"""Changes to cells."""
+	metadata: LSPObject| None = None
+	"""The changed meta data if any."""
 @dataclass
 class NotebookCellArrayChange:
-    """A change describing how to move a `NotebookCell`
-    array from state S to S'."""
-
-    start: uinteger
-    """The start offset of the cell that changed."""
-    deleteCount: uinteger
-    """The number of deleted cells."""
-    cells: list[NotebookCell] | None = None
-    """The new cells, if any."""
-
-
+	"""A change describing how to move a `NotebookCell`
+array from state S to S'."""
+	deleteCount: uinteger 
+	"""The number of deleted cells."""
+	start: uinteger 
+	"""The start offset of the cell that changed."""
+	cells: list[NotebookCell]| None = None
+	"""The new cells, if any."""
 @dataclass
 class DidSaveNotebookDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "notebookDocument/didSave"
-
-    notebookDocument: NotebookDocumentIdentifier
-    """The notebook document that got saved."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'notebookDocument/didSave'
+	notebookDocument: NotebookDocumentIdentifier 
+	"""The notebook document that got saved."""
 @dataclass
 class DidCloseNotebookDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "notebookDocument/didClose"
-
-    notebookDocument: NotebookDocumentIdentifier
-    """The notebook document that got closed."""
-    cellTextDocuments: list[TextDocumentIdentifier]
-    """The text documents that represent the content
+	class Meta(JSONWizard.Meta): 
+		tag = 'notebookDocument/didClose'
+	cellTextDocuments: list[TextDocumentIdentifier] 
+	"""The text documents that represent the content
 of a notebook cell that got closed."""
-
-
+	notebookDocument: NotebookDocumentIdentifier 
+	"""The notebook document that got closed."""
 @dataclass
 class NotebookDocumentIdentifier:
-    """A literal to identify a notebook document in the client."""
-
-    uri: URI
-    """The notebook document's URI."""
-
-
+	"""A literal to identify a notebook document in the client."""
+	uri: URI 
+	"""The notebook document's URI."""
 @dataclass
 class DeclarationClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether declaration supports dynamic registration. If this is set to
+	dynamicRegistration: bool| None = None
+	"""Whether declaration supports dynamic registration. If this is set to
 `true`, the client supports the new `DeclarationRegistrationOptions`
 return value for the corresponding server capability as well."""
-    linkSupport: bool | None = None
-    """The client supports additional metadata in the form of declaration links."""
-
-
+	linkSupport: bool| None = None
+	"""The client supports additional metadata in the form of declaration links."""
 @dataclass
-class DeclarationOptions(WorkDoneProgressOptions):
-    pass
-
-
+class DeclarationOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class DeclarationRegistrationOptions(
-    DeclarationOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class DeclarationRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DeclarationParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/declaration"
-
-
+class DeclarationParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/declaration'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class DefinitionClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether definition supports dynamic registration."""
-    linkSupport: bool | None = None
-    """The client supports additional metadata in the form of definition links."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether definition supports dynamic registration."""
+	linkSupport: bool| None = None
+	"""The client supports additional metadata in the form of definition links."""
 @dataclass
-class DefinitionOptions(WorkDoneProgressOptions):
-    pass
-
-
+class DefinitionOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class DefinitionRegistrationOptions(TextDocumentRegistrationOptions, DefinitionOptions):
-    pass
-
-
+class DefinitionRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DefinitionParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/definition"
-
-
+class DefinitionParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/definition'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class TypeDefinitionClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration. If this is set to
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration. If this is set to
 `true`, the client supports the new `TypeDefinitionRegistrationOptions`
 return value for the corresponding server capability as well."""
-    linkSupport: bool | None = None
-    """The client supports additional metadata in the form of definition links."""
-
-
+	linkSupport: bool| None = None
+	"""The client supports additional metadata in the form of definition links."""
 @dataclass
-class TypeDefinitionOptions(WorkDoneProgressOptions):
-    pass
-
-
+class TypeDefinitionOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class TypeDefinitionRegistrationOptions(
-    TextDocumentRegistrationOptions, TypeDefinitionOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class TypeDefinitionRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class TypeDefinitionParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/typeDefinition"
-
-
+class TypeDefinitionParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/typeDefinition'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class ImplementationClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether the implementation supports dynamic registration. If this is set to
+	dynamicRegistration: bool| None = None
+	"""Whether the implementation supports dynamic registration. If this is set to
 `true`, the client supports the new `ImplementationRegistrationOptions`
 return value for the corresponding server capability as well."""
-    linkSupport: bool | None = None
-    """The client supports additional metadata in the form of definition links."""
-
-
+	linkSupport: bool| None = None
+	"""The client supports additional metadata in the form of definition links."""
 @dataclass
-class ImplementationOptions(WorkDoneProgressOptions):
-    pass
-
-
+class ImplementationOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class ImplementationRegistrationOptions(
-    TextDocumentRegistrationOptions, ImplementationOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class ImplementationRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class ImplementationParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/implementation"
-
-
+class ImplementationParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/implementation'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class ReferenceClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether references supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether references supports dynamic registration."""
 @dataclass
-class ReferenceOptions(WorkDoneProgressOptions):
-    pass
-
-
+class ReferenceOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class ReferenceRegistrationOptions(TextDocumentRegistrationOptions, ReferenceOptions):
-    pass
-
-
+class ReferenceRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	workDoneProgress: bool| None = None
 @dataclass
-class ReferenceParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/references"
-
-    context: ReferenceContext
-
-
+class ReferenceParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/references'
+	context: ReferenceContext 
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class ReferenceContext:
-    includeDeclaration: bool
-    """Include the declaration of the current symbol."""
-
-
+	includeDeclaration: bool 
+	"""Include the declaration of the current symbol."""
 @dataclass
 class CallHierarchyClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration. If this is set to
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration. If this is set to
 `true` the client supports the new `(TextDocumentRegistrationOptions &
 StaticRegistrationOptions)` return value for the corresponding server
 capability as well."""
-
-
 @dataclass
-class CallHierarchyOptions(WorkDoneProgressOptions):
-    pass
-
-
+class CallHierarchyOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class CallHierarchyRegistrationOptions(
-    TextDocumentRegistrationOptions, CallHierarchyOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class CallHierarchyRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class CallHierarchyPrepareParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/prepareCallHierarchy"
-
-
+class CallHierarchyPrepareParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/prepareCallHierarchy'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class CallHierarchyItem:
-    name: str
-    """The name of this item."""
-    kind: SymbolKind
-    """The kind of this item."""
-    tags: list[SymbolTag] | None = None
-    """Tags for this item."""
-    detail: str | None = None
-    """More detail for this item, e.g. the signature of a function."""
-    uri: DocumentUri
-    """The resource identifier of this item."""
-    range: Range
-    """The range enclosing this symbol not including leading/trailing whitespace
+	kind: SymbolKind 
+	"""The kind of this item."""
+	name: str 
+	"""The name of this item."""
+	range: Range 
+	"""The range enclosing this symbol not including leading/trailing whitespace
 but everything else, e.g. comments and code."""
-    selectionRange: Range
-    """The range that should be selected and revealed when this symbol is being
+	selectionRange: Range 
+	"""The range that should be selected and revealed when this symbol is being
 picked, e.g. the name of a function. Must be contained by the
 [`range`](#CallHierarchyItem.range)."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved between a call hierarchy prepare and
+	uri: DocumentUri 
+	"""The resource identifier of this item."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved between a call hierarchy prepare and
 incoming calls or outgoing calls requests."""
-
-
+	detail: str| None = None
+	"""More detail for this item, e.g. the signature of a function."""
+	tags: list[SymbolTag]| None = None
+	"""Tags for this item."""
 @dataclass
-class CallHierarchyIncomingCallsParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "callHierarchy/incomingCalls"
-
-    item: CallHierarchyItem
-
-
+class CallHierarchyIncomingCallsParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'callHierarchy/incomingCalls'
+	item: CallHierarchyItem 
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class CallHierarchyIncomingCall:
-    from_: CallHierarchyItem = Alias("from")
-    """The item that makes the call."""
-    fromRanges: list[Range]
-    """The ranges at which the calls appear. This is relative to the caller
+	from_: CallHierarchyItem = Alias("from")
+	"""The item that makes the call."""
+	fromRanges: list[Range] 
+	"""The ranges at which the calls appear. This is relative to the caller
 denoted by [`this.from`](#CallHierarchyIncomingCall.from)."""
-
-
 @dataclass
-class CallHierarchyOutgoingCallsParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "callHierarchy/outgoingCalls"
-
-    item: CallHierarchyItem
-
-
+class CallHierarchyOutgoingCallsParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'callHierarchy/outgoingCalls'
+	item: CallHierarchyItem 
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class CallHierarchyOutgoingCall:
-    to: CallHierarchyItem
-    """The item that is called."""
-    fromRanges: list[Range]
-    """The range at which this item is called. This is the range relative to
+	fromRanges: list[Range] 
+	"""The range at which this item is called. This is the range relative to
 the caller, e.g., the item passed to `callHierarchy/outgoingCalls` request."""
-
-
+	to: CallHierarchyItem 
+	"""The item that is called."""
 @dataclass
-class TypeHierarchyOptions(WorkDoneProgressOptions):
-    pass
-
-
+class TypeHierarchyOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class TypeHierarchyRegistrationOptions(
-    TextDocumentRegistrationOptions, TypeHierarchyOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class TypeHierarchyRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class TypeHierarchyPrepareParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/prepareTypeHierarchy"
-
-
+class TypeHierarchyPrepareParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/prepareTypeHierarchy'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class TypeHierarchyItem:
-    name: str
-    """The name of this item."""
-    kind: SymbolKind
-    """The kind of this item."""
-    tags: list[SymbolTag] | None = None
-    """Tags for this item."""
-    detail: str | None = None
-    """More detail for this item, e.g. the signature of a function."""
-    uri: DocumentUri
-    """The resource identifier of this item."""
-    range: Range
-    """The range enclosing this symbol not including leading/trailing whitespace
+	kind: SymbolKind 
+	"""The kind of this item."""
+	name: str 
+	"""The name of this item."""
+	range: Range 
+	"""The range enclosing this symbol not including leading/trailing whitespace
 but everything else, e.g. comments and code."""
-    selectionRange: Range
-    """The range that should be selected and revealed when this symbol is being
+	selectionRange: Range 
+	"""The range that should be selected and revealed when this symbol is being
 picked, e.g. the name of a function. Must be contained by the
 [`range`](#TypeHierarchyItem.range)."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved between a type hierarchy prepare and
+	uri: DocumentUri 
+	"""The resource identifier of this item."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved between a type hierarchy prepare and
 supertypes or subtypes requests. It could also be used to identify the
 type hierarchy in the server, helping improve the performance on
 resolving supertypes and subtypes."""
-
-
+	detail: str| None = None
+	"""More detail for this item, e.g. the signature of a function."""
+	tags: list[SymbolTag]| None = None
+	"""Tags for this item."""
 @dataclass
-class TypeHierarchySupertypesParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "typeHierarchy/supertypes"
-
-    item: TypeHierarchyItem
-
-
+class TypeHierarchySupertypesParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'typeHierarchy/supertypes'
+	item: TypeHierarchyItem 
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
-class TypeHierarchySubtypesParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "typeHierarchy/subtypes"
-
-    item: TypeHierarchyItem
-
-
+class TypeHierarchySubtypesParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'typeHierarchy/subtypes'
+	item: TypeHierarchyItem 
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class DocumentHighlightClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether document highlight supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether document highlight supports dynamic registration."""
 @dataclass
-class DocumentHighlightOptions(WorkDoneProgressOptions):
-    pass
-
-
+class DocumentHighlightOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentHighlightRegistrationOptions(
-    TextDocumentRegistrationOptions, DocumentHighlightOptions
-):
-    pass
-
-
+class DocumentHighlightRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentHighlightParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/documentHighlight"
-
-
+class DocumentHighlightParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/documentHighlight'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class DocumentHighlight:
-    """A document highlight is a range inside a text document which deserves
-    special attention. Usually a document highlight is visualized by changing
-    the background color of its range."""
-
-    range: Range
-    """The range this highlight applies to."""
-    kind: DocumentHighlightKind | None = None
-    """The highlight kind, default is DocumentHighlightKind.Text."""
-
-
+	"""A document highlight is a range inside a text document which deserves
+special attention. Usually a document highlight is visualized by changing
+the background color of its range."""
+	range: Range 
+	"""The range this highlight applies to."""
+	kind: DocumentHighlightKind| None = None
+	"""The highlight kind, default is DocumentHighlightKind.Text."""
 @dataclass
 class DocumentLinkClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether document link supports dynamic registration."""
-    tooltipSupport: bool | None = None
-    """Whether the client supports the `tooltip` property on `DocumentLink`."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether document link supports dynamic registration."""
+	tooltipSupport: bool| None = None
+	"""Whether the client supports the `tooltip` property on `DocumentLink`."""
 @dataclass
-class DocumentLinkOptions(WorkDoneProgressOptions):
-    resolveProvider: bool | None = None
-    """Document links have a resolve provider as well."""
-
-
+class DocumentLinkOptions:
+	resolveProvider: bool| None = None
+	"""Document links have a resolve provider as well."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentLinkRegistrationOptions(
-    TextDocumentRegistrationOptions, DocumentLinkOptions
-):
-    pass
-
-
+class DocumentLinkRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	resolveProvider: bool| None = None
+	"""Document links have a resolve provider as well."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentLinkParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/documentLink"
-
-    textDocument: TextDocumentIdentifier
-    """The document to provide document links for."""
-
-
+class DocumentLinkParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/documentLink'
+	textDocument: TextDocumentIdentifier 
+	"""The document to provide document links for."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class DocumentLink:
-    class Meta(JSONWizard.Meta):
-        tag = "documentLink/resolve"
-
-    range: Range
-    """The range this link applies to."""
-    target: URI | None = None
-    """The URI this link points to. If missing, a resolve request is sent later."""
-    tooltip: str | None = None
-    """The tooltip text when you hover over this link.
+	class Meta(JSONWizard.Meta): 
+		tag = 'documentLink/resolve'
+	range: Range 
+	"""The range this link applies to."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved on a document link between a
+DocumentLinkRequest and a DocumentLinkResolveRequest."""
+	target: URI| None = None
+	"""The URI this link points to. If missing, a resolve request is sent later."""
+	tooltip: str| None = None
+	"""The tooltip text when you hover over this link.
 
 If a tooltip is provided, it will be displayed in a string that includes
 instructions on how to trigger the link, such as `{0} (ctrl + click)`.
 The specific instructions vary depending on OS, user settings, and
 localization."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved on a document link between a
-DocumentLinkRequest and a DocumentLinkResolveRequest."""
-
-
 @dataclass
 class HoverClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether hover supports dynamic registration."""
-    contentFormat: list[MarkupKind] | None = None
-    """Client supports the following content formats if the content
+	contentFormat: list[MarkupKind]| None = None
+	"""Client supports the following content formats if the content
 property refers to a `literal of type MarkupContent`.
 The order describes the preferred format of the client."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether hover supports dynamic registration."""
 @dataclass
-class HoverOptions(WorkDoneProgressOptions):
-    pass
-
-
+class HoverOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class HoverRegistrationOptions(TextDocumentRegistrationOptions, HoverOptions):
-    pass
-
-
+class HoverRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	workDoneProgress: bool| None = None
 @dataclass
-class HoverParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/hover"
-
-
+class HoverParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/hover'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class Hover:
-    """The result of a hover request."""
-
-    contents: MarkupContent
-    """The hover's content."""
-    range: Range | None = None
-    """An optional range is a range inside a text document
+	"""The result of a hover request."""
+	contents: MarkupContent 
+	"""The hover's content."""
+	range: Range| None = None
+	"""An optional range is a range inside a text document
 that is used to visualize a hover, e.g. by changing the background color."""
-
-
 @dataclass
 class CodeLensClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether code lens supports dynamic registration."""
-    resolveSupport: ClientCodeLensResolveOptions | None = None
-    """Whether the client supports resolving additional code lens
+	dynamicRegistration: bool| None = None
+	"""Whether code lens supports dynamic registration."""
+	resolveSupport: ClientCodeLensResolveOptions| None = None
+	"""Whether the client supports resolving additional code lens
 properties via a separate `codeLens/resolve` request."""
-
-
 @dataclass
-class CodeLensOptions(WorkDoneProgressOptions):
-    resolveProvider: bool | None = None
-    """Code lens has a resolve provider as well."""
-
-
+class CodeLensOptions:
+	resolveProvider: bool| None = None
+	"""Code lens has a resolve provider as well."""
+	workDoneProgress: bool| None = None
 @dataclass
-class CodeLensRegistrationOptions(TextDocumentRegistrationOptions, CodeLensOptions):
-    pass
-
-
+class CodeLensRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	resolveProvider: bool| None = None
+	"""Code lens has a resolve provider as well."""
+	workDoneProgress: bool| None = None
 @dataclass
-class CodeLensParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/codeLens"
-
-    textDocument: TextDocumentIdentifier
-    """The document to request code lens for."""
-
-
+class CodeLensParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/codeLens'
+	textDocument: TextDocumentIdentifier 
+	"""The document to request code lens for."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class CodeLens:
-    class Meta(JSONWizard.Meta):
-        tag = "codeLens/resolve"
-
-    range: Range
-    """The range in which this code lens is valid. Should only span a single
+	class Meta(JSONWizard.Meta): 
+		tag = 'codeLens/resolve'
+	range: Range 
+	"""The range in which this code lens is valid. Should only span a single
 line."""
-    command: Command | None = None
-    """The command this code lens represents."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved on a code lens item between
+	command: Command| None = None
+	"""The command this code lens represents."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved on a code lens item between
 a code lens and a code lens resolve request."""
-
-
 @dataclass
 class CodeLensWorkspaceClientCapabilities:
-    refreshSupport: bool | None = None
-    """Whether the client implementation supports a refresh request sent from the
+	refreshSupport: bool| None = None
+	"""Whether the client implementation supports a refresh request sent from the
 server to the client.
 
 Note that this event is global and will force the client to refresh all
 code lenses currently shown. It should be used with absolute care and is
 useful for situation where a server, for example, detects a project wide
 change that requires such a calculation."""
-
-
 @dataclass
 class FoldingRangeClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration for folding range
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration for folding range
 providers. If this is set to `true` the client supports the new
 `FoldingRangeRegistrationOptions` return value for the corresponding
 server capability as well."""
-    rangeLimit: uinteger | None = None
-    """The maximum number of folding ranges that the client prefers to receive
-per document. The value serves as a hint, servers are free to follow the
-limit."""
-    lineFoldingOnly: bool | None = None
-    """If set, the client signals that it only supports folding complete lines.
+	foldingRange: ClientFoldingRangeOptions| None = None
+	"""Specific options for the folding range."""
+	foldingRangeKind: ClientFoldingRangeKindOptions| None = None
+	"""Specific options for the folding range kind."""
+	lineFoldingOnly: bool| None = None
+	"""If set, the client signals that it only supports folding complete lines.
 If set, client will ignore specified `startCharacter` and `endCharacter`
 properties in a FoldingRange."""
-    foldingRangeKind: ClientFoldingRangeKindOptions | None = None
-    """Specific options for the folding range kind."""
-    foldingRange: ClientFoldingRangeOptions | None = None
-    """Specific options for the folding range."""
-
-
+	rangeLimit: uinteger| None = None
+	"""The maximum number of folding ranges that the client prefers to receive
+per document. The value serves as a hint, servers are free to follow the
+limit."""
 @dataclass
-class FoldingRangeOptions(WorkDoneProgressOptions):
-    pass
-
-
+class FoldingRangeOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class FoldingRangeRegistrationOptions(
-    TextDocumentRegistrationOptions, FoldingRangeOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class FoldingRangeRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class FoldingRangeParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/foldingRange"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-
-
+class FoldingRangeParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/foldingRange'
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class FoldingRange:
-    """Represents a folding range. To be valid, start and end line must be bigger
-    than zero and smaller than the number of lines in the document. Clients
-    are free to ignore invalid ranges."""
-
-    startLine: uinteger
-    """The zero-based start line of the range to fold. The folded area starts
-after the line's last character. To be valid, the end must be zero or
-larger and smaller than the number of lines in the document."""
-    startCharacter: uinteger | None = None
-    """The zero-based character offset from where the folded range starts. If
-not defined, defaults to the length of the start line."""
-    endLine: uinteger
-    """The zero-based end line of the range to fold. The folded area ends with
+	"""Represents a folding range. To be valid, start and end line must be bigger
+than zero and smaller than the number of lines in the document. Clients
+are free to ignore invalid ranges."""
+	endLine: uinteger 
+	"""The zero-based end line of the range to fold. The folded area ends with
 the line's last character. To be valid, the end must be zero or larger
 and smaller than the number of lines in the document."""
-    endCharacter: uinteger | None = None
-    """The zero-based character offset before the folded range ends. If not
+	startLine: uinteger 
+	"""The zero-based start line of the range to fold. The folded area starts
+after the line's last character. To be valid, the end must be zero or
+larger and smaller than the number of lines in the document."""
+	collapsedText: str| None = None
+	"""The text that the client should show when the specified range is
+collapsed. If not defined or not supported by the client, a default
+will be chosen by the client."""
+	endCharacter: uinteger| None = None
+	"""The zero-based character offset before the folded range ends. If not
 defined, defaults to the length of the end line."""
-    kind: FoldingRangeKind | None = None
-    """Describes the kind of the folding range such as `comment` or `region`.
+	kind: FoldingRangeKind| None = None
+	"""Describes the kind of the folding range such as `comment` or `region`.
 The kind is used to categorize folding ranges and used by commands like
 'Fold all comments'. See [FoldingRangeKind](#FoldingRangeKind) for an
 enumeration of standardized kinds."""
-    collapsedText: str | None = None
-    """The text that the client should show when the specified range is
-collapsed. If not defined or not supported by the client, a default
-will be chosen by the client."""
-
-
+	startCharacter: uinteger| None = None
+	"""The zero-based character offset from where the folded range starts. If
+not defined, defaults to the length of the start line."""
 @dataclass
 class FoldingRangeWorkspaceClientCapabilities:
-    refreshSupport: bool | None = None
-    """Whether the client implementation supports a refresh request sent from the
+	refreshSupport: bool| None = None
+	"""Whether the client implementation supports a refresh request sent from the
 server to the client.
 
 Note that this event is global and will force the client to refresh all
 folding ranges currently shown. It should be used with absolute care and is
 useful for situation where a server, for example, detects a project wide
 change that requires such a calculation."""
-
-
 @dataclass
 class SelectionRangeClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether the implementation supports dynamic registration for selection range
+	dynamicRegistration: bool| None = None
+	"""Whether the implementation supports dynamic registration for selection range
 providers. If this is set to `true`, the client supports the new
 `SelectionRangeRegistrationOptions` return value for the corresponding
 server capability as well."""
-
-
 @dataclass
-class SelectionRangeOptions(WorkDoneProgressOptions):
-    pass
-
-
+class SelectionRangeOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class SelectionRangeRegistrationOptions(
-    SelectionRangeOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class SelectionRangeRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class SelectionRangeParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/selectionRange"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    positions: list[Position]
-    """The positions inside the text document."""
-
-
+class SelectionRangeParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/selectionRange'
+	positions: list[Position] 
+	"""The positions inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class SelectionRange:
-    range: Range
-    """The [range](#Range) of this selection range."""
-    parent: SelectionRange | None = None
-    """The parent selection range containing this range.
+	range: Range 
+	"""The [range](#Range) of this selection range."""
+	parent: SelectionRange| None = None
+	"""The parent selection range containing this range.
 Therefore, `parent.range` must contain `this.range`."""
-
-
 @dataclass
 class DocumentSymbolClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether document symbol supports dynamic registration."""
-    symbolKind: ClientSymbolKindOptions | None = None
-    """Specific capabilities for the `SymbolKind` in the
+	dynamicRegistration: bool| None = None
+	"""Whether document symbol supports dynamic registration."""
+	hierarchicalDocumentSymbolSupport: bool| None = None
+	"""The client supports hierarchical document symbols."""
+	labelSupport: bool| None = None
+	"""The client supports an additional label presented in the UI when
+registering a document symbol provider."""
+	symbolKind: ClientSymbolKindOptions| None = None
+	"""Specific capabilities for the `SymbolKind` in the
 `textDocument/documentSymbol` request."""
-    hierarchicalDocumentSymbolSupport: bool | None = None
-    """The client supports hierarchical document symbols."""
-    tagSupport: ClientSymbolTagOptions | None = None
-    """The client supports tags on `SymbolInformation`. Tags are supported on
+	tagSupport: ClientSymbolTagOptions| None = None
+	"""The client supports tags on `SymbolInformation`. Tags are supported on
 `DocumentSymbol` if `hierarchicalDocumentSymbolSupport` is set to true.
 Clients supporting tags have to handle unknown tags gracefully."""
-    labelSupport: bool | None = None
-    """The client supports an additional label presented in the UI when
-registering a document symbol provider."""
-
-
 @dataclass
-class DocumentSymbolOptions(WorkDoneProgressOptions):
-    label: str | None = None
-    """A human-readable string that is shown when multiple outlines trees
+class DocumentSymbolOptions:
+	label: str| None = None
+	"""A human-readable string that is shown when multiple outlines trees
 are shown for the same document."""
-
-
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentSymbolRegistrationOptions(
-    TextDocumentRegistrationOptions, DocumentSymbolOptions
-):
-    pass
-
-
+class DocumentSymbolRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	label: str| None = None
+	"""A human-readable string that is shown when multiple outlines trees
+are shown for the same document."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentSymbolParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/documentSymbol"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-
-
+class DocumentSymbolParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/documentSymbol'
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class DocumentSymbol:
-    """Represents programming constructs like variables, classes, interfaces etc.
-    that appear in a document. Document symbols can be hierarchical and they
-    have two ranges: one that encloses their definition and one that points to
-    their most interesting range, e.g. the range of an identifier."""
-
-    name: str
-    """The name of this symbol. Will be displayed in the user interface and
+	"""Represents programming constructs like variables, classes, interfaces etc.
+that appear in a document. Document symbols can be hierarchical and they
+have two ranges: one that encloses their definition and one that points to
+their most interesting range, e.g. the range of an identifier."""
+	kind: SymbolKind 
+	"""The kind of this symbol."""
+	name: str 
+	"""The name of this symbol. Will be displayed in the user interface and
 therefore must not be an empty string or a string only consisting of
 white spaces."""
-    detail: str | None = None
-    """More detail for this symbol, e.g. the signature of a function."""
-    kind: SymbolKind
-    """The kind of this symbol."""
-    tags: list[SymbolTag] | None = None
-    """Tags for this document symbol."""
-    deprecated: bool | None = None
-    """Indicates if this symbol is deprecated."""
-    range: Range
-    """The range enclosing this symbol not including leading/trailing whitespace
+	range: Range 
+	"""The range enclosing this symbol not including leading/trailing whitespace
 but everything else, like comments. This information is typically used to
 determine if the client's cursor is inside the symbol to reveal the
 symbol in the UI."""
-    selectionRange: Range
-    """The range that should be selected and revealed when this symbol is being
+	selectionRange: Range 
+	"""The range that should be selected and revealed when this symbol is being
 picked, e.g. the name of a function. Must be contained by the `range`."""
-    children: list[DocumentSymbol] | None = None
-    """Children of this symbol, e.g. properties of a class."""
-
-
+	children: list[DocumentSymbol]| None = None
+	"""Children of this symbol, e.g. properties of a class."""
+	deprecated: bool| None = None
+	"""Indicates if this symbol is deprecated."""
+	detail: str| None = None
+	"""More detail for this symbol, e.g. the signature of a function."""
+	tags: list[SymbolTag]| None = None
+	"""Tags for this document symbol."""
 @dataclass
 class SymbolInformation:
-    """Represents information about programming constructs like variables, classes,
-    interfaces etc."""
-
-    name: str
-    """The name of this symbol."""
-    kind: SymbolKind
-    """The kind of this symbol."""
-    tags: list[SymbolTag] | None = None
-    """Tags for this symbol."""
-    deprecated: bool | None = None
-    """Indicates if this symbol is deprecated."""
-    location: Location
-    """The location of this symbol. The location's range is used by a tool
+	"""Represents information about programming constructs like variables, classes,
+interfaces etc."""
+	kind: SymbolKind 
+	"""The kind of this symbol."""
+	location: Location 
+	"""The location of this symbol. The location's range is used by a tool
 to reveal the location in the editor. If the symbol is selected in the
 tool the range's start information is used to position the cursor. So
 the range usually spans more then the actual symbol's name and does
@@ -2055,30 +1804,29 @@ normally include things like visibility modifiers.
 The range doesn't have to denote a node range in the sense of an abstract
 syntax tree. It can therefore not be used to re-construct a hierarchy of
 the symbols."""
-    containerName: str | None = None
-    """The name of the symbol containing this symbol. This information is for
+	name: str 
+	"""The name of this symbol."""
+	containerName: str| None = None
+	"""The name of the symbol containing this symbol. This information is for
 user interface purposes (e.g. to render a qualifier in the user interface
 if necessary). It can't be used to re-infer a hierarchy for the document
 symbols."""
-
-
+	deprecated: bool| None = None
+	"""Indicates if this symbol is deprecated."""
+	tags: list[SymbolTag]| None = None
+	"""Tags for this symbol."""
 @dataclass
 class SemanticTokensLegend:
-    tokenTypes: list[str]
-    """The token types a server uses."""
-    tokenModifiers: list[str]
-    """The token modifiers a server uses."""
-
-
+	tokenModifiers: list[str] 
+	"""The token modifiers a server uses."""
+	tokenTypes: list[str] 
+	"""The token types a server uses."""
 @dataclass
 class SemanticTokensClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether the implementation supports dynamic registration. If this is set to
-`true`, the client supports the new `(TextDocumentRegistrationOptions &
-StaticRegistrationOptions)` return value for the corresponding server
-capability as well."""
-    requests: ClientSemanticTokensRequestOptions
-    """Which requests the client supports and might send to the server
+	formats: list[TokenFormat] 
+	"""The formats the client supports."""
+	requests: ClientSemanticTokensRequestOptions 
+	"""Which requests the client supports and might send to the server
 depending on the server's capability. Please note that clients might not
 show semantic tokens or degrade some of the user experience if a range
 or full request is advertised by the client but not provided by the
@@ -2086,23 +1834,12 @@ server. If, for example, the client capability `requests.full` and
 `request.range` are both set to true but the server only provides a
 range provider, the client might not render a minimap correctly or might
 even decide to not show any semantic tokens at all."""
-    tokenTypes: list[str]
-    """The token types that the client supports."""
-    tokenModifiers: list[str]
-    """The token modifiers that the client supports."""
-    formats: list[TokenFormat]
-    """The formats the client supports."""
-    overlappingTokenSupport: bool | None = None
-    """Whether the client supports tokens that can overlap each other."""
-    multilineTokenSupport: bool | None = None
-    """Whether the client supports tokens that can span multiple lines."""
-    serverCancelSupport: bool | None = None
-    """Whether the client allows the server to actively cancel a
-semantic token request, e.g. supports returning
-ErrorCodes.ServerCancelled. If a server does so, the client
-needs to retrigger the request."""
-    augmentsSyntaxTokens: bool | None = None
-    """Whether the client uses semantic tokens to augment existing
+	tokenModifiers: list[str] 
+	"""The token modifiers that the client supports."""
+	tokenTypes: list[str] 
+	"""The token types that the client supports."""
+	augmentsSyntaxTokens: bool| None = None
+	"""Whether the client uses semantic tokens to augment existing
 syntax tokens. If set to `true`, client side created syntax
 tokens and semantic tokens are both used for colorization. If
 set to `false`, the client only uses the returned semantic tokens
@@ -2110,167 +1847,195 @@ for colorization.
 
 If the value is `undefined` then the client behavior is not
 specified."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether the implementation supports dynamic registration. If this is set to
+`true`, the client supports the new `(TextDocumentRegistrationOptions &
+StaticRegistrationOptions)` return value for the corresponding server
+capability as well."""
+	multilineTokenSupport: bool| None = None
+	"""Whether the client supports tokens that can span multiple lines."""
+	overlappingTokenSupport: bool| None = None
+	"""Whether the client supports tokens that can overlap each other."""
+	serverCancelSupport: bool| None = None
+	"""Whether the client allows the server to actively cancel a
+semantic token request, e.g. supports returning
+ErrorCodes.ServerCancelled. If a server does so, the client
+needs to retrigger the request."""
 @dataclass
-class SemanticTokensOptions(WorkDoneProgressOptions):
-    legend: SemanticTokensLegend
-    """The legend used by the server."""
-    range: bool | Empty | None = None
-    """Server supports providing semantic tokens for a specific range
+class SemanticTokensOptions:
+	legend: SemanticTokensLegend 
+	"""The legend used by the server."""
+	full: bool | SemanticTokensFullDelta| None = None
+	"""Server supports providing semantic tokens for a full document."""
+	range: bool | Empty| None = None
+	"""Server supports providing semantic tokens for a specific range
 of a document."""
-    full: bool | SemanticTokensFullDelta | None = None
-    """Server supports providing semantic tokens for a full document."""
-
-
+	workDoneProgress: bool| None = None
 @dataclass
-class SemanticTokensRegistrationOptions(
-    TextDocumentRegistrationOptions, SemanticTokensOptions, StaticRegistrationOptions
-):
-    pass
-
-
+class SemanticTokensRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	legend: SemanticTokensLegend 
+	"""The legend used by the server."""
+	full: bool | SemanticTokensFullDelta| None = None
+	"""Server supports providing semantic tokens for a full document."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	range: bool | Empty| None = None
+	"""Server supports providing semantic tokens for a specific range
+of a document."""
+	workDoneProgress: bool| None = None
 @dataclass
-class SemanticTokensParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/semanticTokens/full"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-
-
+class SemanticTokensParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/semanticTokens/full'
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class SemanticTokens:
-    resultId: str | None = None
-    """An optional result ID. If provided and clients support delta updating,
+	data: list[uinteger] 
+	"""The actual tokens."""
+	resultId: str| None = None
+	"""An optional result ID. If provided and clients support delta updating,
 the client will include the result ID in the next semantic token request.
 A server can then, instead of computing all semantic tokens again, simply
 send a delta."""
-    data: list[uinteger]
-    """The actual tokens."""
-
-
 @dataclass
 class SemanticTokensPartialResult:
-    data: list[uinteger]
-
-
+	data: list[uinteger] 
 @dataclass
-class SemanticTokensDeltaParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/semanticTokens/full/delta"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    previousResultId: str
-    """The result ID of a previous response. The result ID can either point to
+class SemanticTokensDeltaParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/semanticTokens/full/delta'
+	previousResultId: str 
+	"""The result ID of a previous response. The result ID can either point to
 a full response or a delta response, depending on what was received last."""
-
-
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class SemanticTokensDelta:
-    resultId: str | None = None
-    edits: list[SemanticTokensEdit]
-    """The semantic token edits to transform a previous result into a new
+	edits: list[SemanticTokensEdit] 
+	"""The semantic token edits to transform a previous result into a new
 result."""
-
-
+	resultId: str| None = None
 @dataclass
 class SemanticTokensEdit:
-    start: uinteger
-    """The start offset of the edit."""
-    deleteCount: uinteger
-    """The count of elements to remove."""
-    data: list[uinteger] | None = None
-    """The elements to insert."""
-
-
+	deleteCount: uinteger 
+	"""The count of elements to remove."""
+	start: uinteger 
+	"""The start offset of the edit."""
+	data: list[uinteger]| None = None
+	"""The elements to insert."""
 @dataclass
 class SemanticTokensDeltaPartialResult:
-    edits: list[SemanticTokensEdit]
-
-
+	edits: list[SemanticTokensEdit] 
 @dataclass
-class SemanticTokensRangeParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/semanticTokens/range"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    range: Range
-    """The range the semantic tokens are requested for."""
-
-
+class SemanticTokensRangeParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/semanticTokens/range'
+	range: Range 
+	"""The range the semantic tokens are requested for."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class SemanticTokensWorkspaceClientCapabilities:
-    refreshSupport: bool | None = None
-    """Whether the client implementation supports a refresh request sent from
+	refreshSupport: bool| None = None
+	"""Whether the client implementation supports a refresh request sent from
 the server to the client.
 
 Note that this event is global and will force the client to refresh all
 semantic tokens currently shown. It should be used with absolute care
 and is useful for situation where a server, for example, detects a project
 wide change that requires such a calculation."""
-
-
 @dataclass
 class InlayHintClientCapabilities:
-    """Inlay hint client capabilities."""
-
-    dynamicRegistration: bool | None = None
-    """Whether inlay hints support dynamic registration."""
-    resolveSupport: ClientInlayHintResolveOptions | None = None
-    """Indicates which properties a client can resolve lazily on an inlay
+	"""Inlay hint client capabilities."""
+	dynamicRegistration: bool| None = None
+	"""Whether inlay hints support dynamic registration."""
+	resolveSupport: ClientInlayHintResolveOptions| None = None
+	"""Indicates which properties a client can resolve lazily on an inlay
 hint."""
-
-
 @dataclass
-class InlayHintOptions(WorkDoneProgressOptions):
-    """Inlay hint options used during static registration."""
-
-    resolveProvider: bool | None = None
-    """The server provides support to resolve additional
+class InlayHintOptions:
+	"""Inlay hint options used during static registration."""
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
 information for an inlay hint item."""
-
-
+	workDoneProgress: bool| None = None
 @dataclass
-class InlayHintRegistrationOptions(
-    InlayHintOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions
-):
-    """Inlay hint options used during static or dynamic registration."""
-
-
+class InlayHintRegistrationOptions:
+	"""Inlay hint options used during static or dynamic registration."""
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
+information for an inlay hint item."""
+	workDoneProgress: bool| None = None
 @dataclass
-class InlayHintParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/inlayHint"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    range: Range
-    """The visible document range for which inlay hints should be computed."""
-
-
+class InlayHintParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/inlayHint'
+	range: Range 
+	"""The visible document range for which inlay hints should be computed."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class InlayHint:
-    class Meta(JSONWizard.Meta):
-        tag = "inlayHint/resolve"
-
-    position: Position
-    """The position of this hint.
-
-If multiple hints have the same position, they will be shown in the order
-they appear in the response."""
-    label: str | list[InlayHintLabelPart]
-    """The label of this hint. A human readable string or an array of
+	class Meta(JSONWizard.Meta): 
+		tag = 'inlayHint/resolve'
+	label: str | list[InlayHintLabelPart] 
+	"""The label of this hint. A human readable string or an array of
 InlayHintLabelPart label parts.
 
 *Note* that neither the string nor the label part can be empty."""
-    kind: InlayHintKind | None = None
-    """The kind of this hint. Can be omitted in which case the client
+	position: Position 
+	"""The position of this hint.
+
+If multiple hints have the same position, they will be shown in the order
+they appear in the response."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved on an inlay hint between
+a `textDocument/inlayHint` and an `inlayHint/resolve` request."""
+	kind: InlayHintKind| None = None
+	"""The kind of this hint. Can be omitted in which case the client
 should fall back to a reasonable default."""
-    textEdits: list[TextEdit] | None = None
-    """Optional text edits that are performed when accepting this inlay hint.
+	paddingLeft: bool| None = None
+	"""Render padding before the hint.
+
+Note: Padding should use the editor's background color, not the
+background color of the hint itself. That means padding can be used
+to visually align/separate an inlay hint."""
+	paddingRight: bool| None = None
+	"""Render padding after the hint.
+
+Note: Padding should use the editor's background color, not the
+background color of the hint itself. That means padding can be used
+to visually align/separate an inlay hint."""
+	textEdits: list[TextEdit]| None = None
+	"""Optional text edits that are performed when accepting this inlay hint.
 
 *Note* that edits are expected to change the document so that the inlay
 hint (or its nearest variant) is now part of the document and the inlay
@@ -2278,41 +2043,24 @@ hint itself is now obsolete.
 
 Depending on the client capability `inlayHint.resolveSupport`,
 clients might resolve this property late using the resolve request."""
-    tooltip: str | MarkupContent | None = None
-    """The tooltip text when you hover over this item.
+	tooltip: str | MarkupContent| None = None
+	"""The tooltip text when you hover over this item.
 
 Depending on the client capability `inlayHint.resolveSupport` clients
 might resolve this property late using the resolve request."""
-    paddingLeft: bool | None = None
-    """Render padding before the hint.
-
-Note: Padding should use the editor's background color, not the
-background color of the hint itself. That means padding can be used
-to visually align/separate an inlay hint."""
-    paddingRight: bool | None = None
-    """Render padding after the hint.
-
-Note: Padding should use the editor's background color, not the
-background color of the hint itself. That means padding can be used
-to visually align/separate an inlay hint."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved on an inlay hint between
-a `textDocument/inlayHint` and an `inlayHint/resolve` request."""
-
-
 @dataclass
 class InlayHintLabelPart:
-    """An inlay hint label part allows for interactive and composite labels
-    of inlay hints."""
+	"""An inlay hint label part allows for interactive and composite labels
+of inlay hints."""
+	value: str 
+	"""The value of this label part."""
+	command: Command| None = None
+	"""An optional command for this label part.
 
-    value: str
-    """The value of this label part."""
-    tooltip: str | MarkupContent | None = None
-    """The tooltip text when you hover over this label part. Depending on
-the client capability `inlayHint.resolveSupport`, clients might resolve
-this property late using the resolve request."""
-    location: Location | None = None
-    """An optional source code location that represents this
+Depending on the client capability `inlayHint.resolveSupport`, clients
+might resolve this property late using the resolve request."""
+	location: Location| None = None
+	"""An optional source code location that represents this
 label part.
 
 The editor will use this location for the hover and for code navigation
@@ -2323,210 +2071,176 @@ and it shows a context menu with further code navigation commands.
 
 Depending on the client capability `inlayHint.resolveSupport` clients
 might resolve this property late using the resolve request."""
-    command: Command | None = None
-    """An optional command for this label part.
-
-Depending on the client capability `inlayHint.resolveSupport`, clients
-might resolve this property late using the resolve request."""
-
-
+	tooltip: str | MarkupContent| None = None
+	"""The tooltip text when you hover over this label part. Depending on
+the client capability `inlayHint.resolveSupport`, clients might resolve
+this property late using the resolve request."""
 @dataclass
 class InlayHintWorkspaceClientCapabilities:
-    """Client workspace capabilities specific to inlay hints."""
-
-    refreshSupport: bool | None = None
-    """Whether the client implementation supports a refresh request sent from
+	"""Client workspace capabilities specific to inlay hints."""
+	refreshSupport: bool| None = None
+	"""Whether the client implementation supports a refresh request sent from
 the server to the client.
 
 Note that this event is global and will force the client to refresh all
 inlay hints currently shown. It should be used with absolute care and
 is useful for situations where a server, for example, detects a project wide
 change that requires such a calculation."""
-
-
 @dataclass
 class InlineValueClientCapabilities:
-    """Client capabilities specific to inline values."""
-
-    dynamicRegistration: bool | None = None
-    """Whether the implementation supports dynamic registration for inline
+	"""Client capabilities specific to inline values."""
+	dynamicRegistration: bool| None = None
+	"""Whether the implementation supports dynamic registration for inline
 value providers."""
-
-
 @dataclass
-class InlineValueOptions(WorkDoneProgressOptions):
-    """Inline value options used during static registration."""
-
-
+class InlineValueOptions:
+	"""Inline value options used during static registration."""
+	workDoneProgress: bool| None = None
 @dataclass
-class InlineValueRegistrationOptions(
-    InlineValueOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions
-):
-    """Inline value options used during static or dynamic registration."""
-
-
+class InlineValueRegistrationOptions:
+	"""Inline value options used during static or dynamic registration."""
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class InlineValueParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/inlineValue"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    range: Range
-    """The document range for which inline values information will be returned."""
-    context: InlineValueContext
-    """Additional information about the context in which inline values information was
+class InlineValueParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/inlineValue'
+	context: InlineValueContext 
+	"""Additional information about the context in which inline values information was
 requested."""
-
-
+	range: Range 
+	"""The document range for which inline values information will be returned."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class InlineValueContext:
-    """undefined"""
-
-    frameId: integer
-    """The stack frame (as a DAP ID) where the execution has stopped."""
-    stoppedLocation: Range
-    """The document range where execution has stopped.
+	""""""
+	frameId: integer 
+	"""The stack frame (as a DAP ID) where the execution has stopped."""
+	stoppedLocation: Range 
+	"""The document range where execution has stopped.
 Typically, the end position of the range denotes the line where the
 inline values are shown."""
-
-
 @dataclass
 class InlineValueText:
-    """Returns inline value information as the complete text to be shown."""
-
-    range: Range
-    """The document range for which the inline value applies."""
-    text: str
-    """The text of the inline value."""
-
-
+	"""Returns inline value information as the complete text to be shown."""
+	range: Range 
+	"""The document range for which the inline value applies."""
+	text: str 
+	"""The text of the inline value."""
 @dataclass
 class InlineValueVariableLookup:
-    """To compute inline value through a variable lookup.
+	"""To compute inline value through a variable lookup.
 
-    If only a range is specified, the variable name should be extracted from
-    the underlying document.
+If only a range is specified, the variable name should be extracted from
+the underlying document.
 
-    An optional variable name could be used to lookup instead of the extracted name."""
-
-    range: Range
-    """The document range for which the inline value applies.
+An optional variable name could be used to lookup instead of the extracted name."""
+	caseSensitiveLookup: bool 
+	"""How to perform the lookup."""
+	range: Range 
+	"""The document range for which the inline value applies.
 The range could be used to extract the variable name from the underlying
 document."""
-    variableName: str | None = None
-    """If specified, the name of the variable to look up."""
-    caseSensitiveLookup: bool
-    """How to perform the lookup."""
-
-
+	variableName: str| None = None
+	"""If specified, the name of the variable to look up."""
 @dataclass
 class InlineValueEvaluatableExpression:
-    """To compute an inline value through an expression evaluation.
+	"""To compute an inline value through an expression evaluation.
 
-    If only a range is specified, the expression should be extracted from the
-    underlying document.
+If only a range is specified, the expression should be extracted from the
+underlying document.
 
-    An optional expression could be evaluated instead of the extracted expression."""
-
-    range: Range
-    """The document range for which the inline value applies.
+An optional expression could be evaluated instead of the extracted expression."""
+	range: Range 
+	"""The document range for which the inline value applies.
 The range could be used to extract the evaluatable expression from the
 underlying document."""
-    expression: str | None = None
-    """If specified the expression could be evaluated instead."""
-
-
+	expression: str| None = None
+	"""If specified the expression could be evaluated instead."""
 @dataclass
 class InlineValueWorkspaceClientCapabilities:
-    """Client workspace capabilities specific to inline values."""
-
-    refreshSupport: bool | None = None
-    """Whether the client implementation supports a refresh request sent from
+	"""Client workspace capabilities specific to inline values."""
+	refreshSupport: bool| None = None
+	"""Whether the client implementation supports a refresh request sent from
 the server to the client.
 
 Note that this event is global and will force the client to refresh all
 inline values currently shown. It should be used with absolute care and
 is useful for situations where a server, for example, detects a project
 wide change that requires such a calculation."""
-
-
 @dataclass
 class MonikerClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration. If this is set to
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration. If this is set to
 `true`, the client supports the new `(TextDocumentRegistrationOptions &
 StaticRegistrationOptions)` return value for the corresponding server
 capability as well."""
-
-
 @dataclass
-class MonikerOptions(WorkDoneProgressOptions):
-    pass
-
-
+class MonikerOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class MonikerRegistrationOptions(TextDocumentRegistrationOptions, MonikerOptions):
-    pass
-
-
+class MonikerRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	workDoneProgress: bool| None = None
 @dataclass
-class MonikerParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/moniker"
-
-
+class MonikerParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/moniker'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class Moniker:
-    """Moniker definition to match LSIF 0.5 moniker definition."""
-
-    scheme: str
-    """The scheme of the moniker. For example, `tsc` or `.NET`."""
-    identifier: str
-    """The identifier of the moniker. The value is opaque in LSIF, however
+	"""Moniker definition to match LSIF 0.5 moniker definition."""
+	identifier: str 
+	"""The identifier of the moniker. The value is opaque in LSIF, however
 schema owners are allowed to define the structure if they want."""
-    unique: UniquenessLevel
-    """The scope in which the moniker is unique."""
-    kind: MonikerKind | None = None
-    """The moniker kind if known."""
-
-
+	scheme: str 
+	"""The scheme of the moniker. For example, `tsc` or `.NET`."""
+	unique: UniquenessLevel 
+	"""The scope in which the moniker is unique."""
+	kind: MonikerKind| None = None
+	"""The moniker kind if known."""
 @dataclass
 class CompletionClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether completion supports dynamic registration."""
-    completionItem: ClientCompletionItemOptions | None = None
-    """The client supports the following `CompletionItem` specific
+	completionItem: ClientCompletionItemOptions| None = None
+	"""The client supports the following `CompletionItem` specific
 capabilities."""
-    completionItemKind: ClientCompletionItemOptionsKind | None = None
-    """The client supports the following completion item kinds."""
-    contextSupport: bool | None = None
-    """The client supports sending additional context information for a
+	completionItemKind: ClientCompletionItemOptionsKind| None = None
+	"""The client supports the following completion item kinds."""
+	completionList: CompletionListCapabilities| None = None
+	"""The client supports the following `CompletionList` specific
+capabilities."""
+	contextSupport: bool| None = None
+	"""The client supports sending additional context information for a
 `textDocument/completion` request."""
-    insertTextMode: InsertTextMode | None = None
-    """The client's default when the completion item doesn't provide an
+	dynamicRegistration: bool| None = None
+	"""Whether completion supports dynamic registration."""
+	insertTextMode: InsertTextMode| None = None
+	"""The client's default when the completion item doesn't provide an
 `insertTextMode` property."""
-    completionList: CompletionListCapabilities | None = None
-    """The client supports the following `CompletionList` specific
-capabilities."""
-
-
 @dataclass
 class CompletionListCapabilities:
-    """The client supports the following `CompletionList` specific
-    capabilities."""
-
-    itemDefaults: list[str] | None = None
-    """The client supports the following itemDefaults on
-a completion list.
-
-The value lists the supported property names of the
-`CompletionList.itemDefaults` object. If omitted
-no properties are supported."""
-    applyKindSupport: bool | None = None
-    """Specifies whether the client supports `CompletionList.applyKind` to
+	"""The client supports the following `CompletionList` specific
+capabilities."""
+	applyKindSupport: bool| None = None
+	"""Specifies whether the client supports `CompletionList.applyKind` to
 indicate how supported values from `completionList.itemDefaults`
 and `completion` will be combined.
 
@@ -2535,14 +2249,32 @@ that it supports that are listed in `CompletionList.applyKind`. This
 means when clients add support for new/future fields in completion
 items the MUST also support merge for them if those fields are
 defined in `CompletionList.applyKind`."""
+	itemDefaults: list[str]| None = None
+	"""The client supports the following itemDefaults on
+a completion list.
 
-
+The value lists the supported property names of the
+`CompletionList.itemDefaults` object. If omitted
+no properties are supported."""
 @dataclass
-class CompletionOptions(WorkDoneProgressOptions):
-    """Completion options."""
+class CompletionOptions:
+	"""Completion options."""
+	allCommitCharacters: list[str]| None = None
+	"""The list of all possible characters that commit a completion. This field
+can be used if clients don't support individual commit characters per
+completion item. See client capability
+`completion.completionItem.commitCharactersSupport`.
 
-    triggerCharacters: list[str] | None = None
-    """Most tools trigger completion request automatically without explicitly
+If a server provides both `allCommitCharacters` and commit characters on
+an individual completion item, the ones on the completion item win."""
+	completionItem: ServerCompletionItemOptions| None = None
+	"""The server supports the following `CompletionItem` specific
+capabilities."""
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
+information for a completion item."""
+	triggerCharacters: list[str]| None = None
+	"""Most tools trigger completion request automatically without explicitly
 requesting it using a keyboard shortcut (e.g., Ctrl+Space). Typically they
 do so when the user starts to type an identifier. For example, if the user
 types `c` in a JavaScript file, code complete will automatically pop up and
@@ -2552,80 +2284,79 @@ make up identifiers don't need to be listed here.
 If code complete should automatically be triggered on characters not being
 valid inside an identifier (for example, `.` in JavaScript), list them in
 `triggerCharacters`."""
-    allCommitCharacters: list[str] | None = None
-    """The list of all possible characters that commit a completion. This field
+	workDoneProgress: bool| None = None
+@dataclass
+class CompletionRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	allCommitCharacters: list[str]| None = None
+	"""The list of all possible characters that commit a completion. This field
 can be used if clients don't support individual commit characters per
 completion item. See client capability
 `completion.completionItem.commitCharactersSupport`.
 
 If a server provides both `allCommitCharacters` and commit characters on
 an individual completion item, the ones on the completion item win."""
-    resolveProvider: bool | None = None
-    """The server provides support to resolve additional
-information for a completion item."""
-    completionItem: ServerCompletionItemOptions | None = None
-    """The server supports the following `CompletionItem` specific
+	completionItem: ServerCompletionItemOptions| None = None
+	"""The server supports the following `CompletionItem` specific
 capabilities."""
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
+information for a completion item."""
+	triggerCharacters: list[str]| None = None
+	"""Most tools trigger completion request automatically without explicitly
+requesting it using a keyboard shortcut (e.g., Ctrl+Space). Typically they
+do so when the user starts to type an identifier. For example, if the user
+types `c` in a JavaScript file, code complete will automatically pop up and
+present `console` besides others as a completion item. Characters that
+make up identifiers don't need to be listed here.
 
-
+If code complete should automatically be triggered on characters not being
+valid inside an identifier (for example, `.` in JavaScript), list them in
+`triggerCharacters`."""
+	workDoneProgress: bool| None = None
 @dataclass
-class CompletionRegistrationOptions(TextDocumentRegistrationOptions, CompletionOptions):
-    pass
-
-
-@dataclass
-class CompletionParams(
-    TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams
-):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/completion"
-
-    context: CompletionContext | None = None
-    """The completion context. This is only available if the client specifies
+class CompletionParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/completion'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	context: CompletionContext| None = None
+	"""The completion context. This is only available if the client specifies
 to send this using the client capability
 `completion.contextSupport === true`"""
-
-
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class CompletionContext:
-    """Contains additional information about the context in which a completion
-    request is triggered."""
-
-    triggerKind: CompletionTriggerKind
-    """How the completion was triggered."""
-    triggerCharacter: str | None = None
-    """The trigger character (a single character) that
+	"""Contains additional information about the context in which a completion
+request is triggered."""
+	triggerKind: CompletionTriggerKind 
+	"""How the completion was triggered."""
+	triggerCharacter: str| None = None
+	"""The trigger character (a single character) that
 has triggered code complete. Is undefined if
 `triggerKind !== CompletionTriggerKind.TriggerCharacter`"""
-
-
 @dataclass
 class CompletionList:
-    """Represents a collection of [completion items](#CompletionItem) to be
-    presented in the editor."""
-
-    isIncomplete: bool
-    """This list is not complete. Further typing should result in recomputing
+	"""Represents a collection of [completion items](#CompletionItem) to be
+presented in the editor."""
+	isIncomplete: bool 
+	"""This list is not complete. Further typing should result in recomputing
 this list.
 
 Recomputed lists have all their items replaced (not appended) in the
 incomplete completion sessions."""
-    itemDefaults: CompletionItemDefaults | None = None
-    """In many cases, the items of an actual completion result share the same
-value for properties like `commitCharacters` or the range of a text
-edit. A completion list can therefore define item defaults which will
-be used if a completion item itself doesn't specify the value.
-
-If a completion list specifies a default value and a completion item
-also specifies a corresponding value, the rules for combining these are
-defined by `applyKinds` (if the client supports it), defaulting to
-ApplyKind.Replace.
-
-Servers are only allowed to return default values if the client
-signals support for this via the `completionList.itemDefaults`
-capability."""
-    applyKind: CompletionItemApplyKinds | None = None
-    """Specifies how fields from a completion item should be combined with those
+	items: list[CompletionItem] 
+	"""The completion items."""
+	applyKind: CompletionItemApplyKinds| None = None
+	"""Specifies how fields from a completion item should be combined with those
 from `completionList.itemDefaults`.
 
 If unspecified, all fields will be treated as ApplyKind.Replace.
@@ -2640,58 +2371,64 @@ the rules defined against each field below.
 Servers are only allowed to return `applyKind` if the client
 signals support for this via the `completionList.applyKindSupport`
 capability."""
-    items: list[CompletionItem]
-    """The completion items."""
+	itemDefaults: CompletionItemDefaults| None = None
+	"""In many cases, the items of an actual completion result share the same
+value for properties like `commitCharacters` or the range of a text
+edit. A completion list can therefore define item defaults which will
+be used if a completion item itself doesn't specify the value.
 
+If a completion list specifies a default value and a completion item
+also specifies a corresponding value, the rules for combining these are
+defined by `applyKinds` (if the client supports it), defaulting to
+ApplyKind.Replace.
 
+Servers are only allowed to return default values if the client
+signals support for this via the `completionList.itemDefaults`
+capability."""
 @dataclass
 class CompletionItemDefaults:
-    """In many cases the items of an actual completion result share the same
-    value for properties like `commitCharacters` or the range of a text
-    edit. A completion list can therefore define item defaults which will
-    be used if a completion item itself doesn't specify the value.
+	"""In many cases the items of an actual completion result share the same
+value for properties like `commitCharacters` or the range of a text
+edit. A completion list can therefore define item defaults which will
+be used if a completion item itself doesn't specify the value.
 
-    If a completion list specifies a default value and a completion item
-    also specifies a corresponding value, the rules for combining these are
-    defined by `applyKinds` (if the client supports it), defaulting to
-    ApplyKind.Replace.
+If a completion list specifies a default value and a completion item
+also specifies a corresponding value, the rules for combining these are
+defined by `applyKinds` (if the client supports it), defaulting to
+ApplyKind.Replace.
 
-    Servers are only allowed to return default values if the client
-    signals support for this via the `completionList.itemDefaults`
-    capability."""
-
-    commitCharacters: list[str] | None = None
-    """A default commit character set."""
-    editRange: Range | EditRangeWithInsertReplace | None = None
-    """A default edit range."""
-    insertTextFormat: InsertTextFormat | None = None
-    """A default insert text format."""
-    insertTextMode: InsertTextMode | None = None
-    """A default insert text mode."""
-    data: LSPAny | None = None
-    """A default data value."""
-
-
+Servers are only allowed to return default values if the client
+signals support for this via the `completionList.itemDefaults`
+capability."""
+	commitCharacters: list[str]| None = None
+	"""A default commit character set."""
+	data: LSPAny| None = None
+	"""A default data value."""
+	editRange: Range | EditRangeWithInsertReplace| None = None
+	"""A default edit range."""
+	insertTextFormat: InsertTextFormat| None = None
+	"""A default insert text format."""
+	insertTextMode: InsertTextMode| None = None
+	"""A default insert text mode."""
 @dataclass
 class CompletionItemApplyKinds:
-    """Specifies how fields from a completion item should be combined with those
-    from `completionList.itemDefaults`.
+	"""Specifies how fields from a completion item should be combined with those
+from `completionList.itemDefaults`.
 
-    If unspecified, all fields will be treated as ApplyKind.Replace.
+If unspecified, all fields will be treated as ApplyKind.Replace.
 
-    If a field's value is ApplyKind.Replace, the value from a completion item (if
-    provided and not `null`) will always be used instead of the value from
-    `completionItem.itemDefaults`.
+If a field's value is ApplyKind.Replace, the value from a completion item (if
+provided and not `null`) will always be used instead of the value from
+`completionItem.itemDefaults`.
 
-    If a field's value is ApplyKind.Merge, the values will be merged using the rules
-    defined against each field below.
+If a field's value is ApplyKind.Merge, the values will be merged using the rules
+defined against each field below.
 
-    Servers are only allowed to return `applyKind` if the client
-    signals support for this via the `completionList.applyKindSupport`
-    capability."""
-
-    commitCharacters: ApplyKind | None = None
-    """Specifies whether commitCharacters on a completion will replace or be
+Servers are only allowed to return `applyKind` if the client
+signals support for this via the `completionList.applyKindSupport`
+capability."""
+	commitCharacters: ApplyKind| None = None
+	"""Specifies whether commitCharacters on a completion will replace or be
 merged with those in `completionList.itemDefaults.commitCharacters`.
 
 If ApplyKind.Replace, the commit characters from the completion item will
@@ -2704,8 +2441,8 @@ characters and also should not use those from
 If ApplyKind.Merge the commitCharacters for the completion will be the
 union of all values in both `completionList.itemDefaults.commitCharacters`
 and the completion's own `commitCharacters`."""
-    data: ApplyKind | None = None
-    """Specifies whether the `data` field on a completion will replace or
+	data: ApplyKind| None = None
+	"""Specifies whether the `data` field on a completion will replace or
 be merged with data from `completionList.itemDefaults.data`.
 
 If ApplyKind.Replace, the data from the completion item will be used if
@@ -2725,74 +2462,67 @@ using the following rules:
   overwrite the field of the same name in
   `completionList.itemDefaults.data` but no merging of nested fields
   within that value will occur."""
-
-
 @dataclass
 class InsertReplaceEdit:
-    """A special text edit to provide an insert and a replace operation."""
-
-    newText: str
-    """The string to be inserted."""
-    insert: Range
-    """The range if the insert is requested."""
-    replace: Range
-    """The range if the replace is requested."""
-
-
+	"""A special text edit to provide an insert and a replace operation."""
+	insert: Range 
+	"""The range if the insert is requested."""
+	newText: str 
+	"""The string to be inserted."""
+	replace: Range 
+	"""The range if the replace is requested."""
 @dataclass
 class CompletionItemLabelDetails:
-    """Additional details for a completion item label."""
-
-    detail: str | None = None
-    """[object Object],[object Object],[object Object]"""
-    description: str | None = None
-    """[object Object],[object Object],[object Object]"""
-
-
+	"""Additional details for a completion item label."""
+	description: str| None = None
+	"""[object Object],[object Object],[object Object]"""
+	detail: str| None = None
+	"""[object Object],[object Object],[object Object]"""
 @dataclass
 class CompletionItem:
-    class Meta(JSONWizard.Meta):
-        tag = "completionItem/resolve"
-
-    label: str
-    """The label of this completion item.
+	class Meta(JSONWizard.Meta): 
+		tag = 'completionItem/resolve'
+	label: str 
+	"""The label of this completion item.
 
 The label property is also by default the text that
 is inserted when selecting this completion.
 
 If label details are provided, the label itself should
 be an unqualified name of the completion item."""
-    labelDetails: CompletionItemLabelDetails | None = None
-    """Additional details for the label."""
-    kind: CompletionItemKind | None = None
-    """The kind of this completion item. Based on the kind,
-an icon is chosen by the editor. The standardized set
-of available values is defined in `CompletionItemKind`."""
-    tags: list[CompletionItemTag] | None = None
-    """Tags for this completion item."""
-    detail: str | None = None
-    """A human-readable string with additional information
-about this item, like type or symbol information."""
-    documentation: str | MarkupContent | None = None
-    """A human-readable string that represents a doc-comment."""
-    deprecated: bool | None = None
-    """Indicates if this item is deprecated."""
-    preselect: bool | None = None
-    """Select this item when showing.
+	additionalTextEdits: list[TextEdit]| None = None
+	"""An optional array of additional text edits that are applied when
+selecting this completion. Edits must not overlap (including the same
+insert position) with the main edit nor with themselves.
 
-*Note* that only one completion item can be selected and that the
-tool / client decides which item that is. The rule is that the *first*
-item of those that match best is selected."""
-    sortText: str | None = None
-    """A string that should be used when comparing this item
-with other items. When omitted, the label is used
-as the sort text for this item."""
-    filterText: str | None = None
-    """A string that should be used when filtering a set of
+Additional text edits should be used to change text unrelated to the
+current cursor position (for example adding an import statement at the
+top of the file if the completion item will insert an unqualified type)."""
+	command: Command| None = None
+	"""An optional command that is executed *after* inserting this completion.
+*Note* that additional modifications to the current document should be
+described with the additionalTextEdits-property."""
+	commitCharacters: list[str]| None = None
+	"""An optional set of characters that, when pressed while this completion is
+active, will accept it first and then type that character. *Note* that all
+commit characters should have `length=1` and that superfluous characters
+will be ignored."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved on a completion item between
+a completion and a completion resolve request."""
+	deprecated: bool| None = None
+	"""Indicates if this item is deprecated."""
+	detail: str| None = None
+	"""A human-readable string with additional information
+about this item, like type or symbol information."""
+	documentation: str | MarkupContent| None = None
+	"""A human-readable string that represents a doc-comment."""
+	filterText: str| None = None
+	"""A string that should be used when filtering a set of
 completion items. When omitted, the label is used as the
 filter text for this item."""
-    insertText: str | None = None
-    """A string that should be inserted into a document when selecting
+	insertText: str| None = None
+	"""A string that should be inserted into a document when selecting
 this completion. When omitted, the label is used as the insert text
 for this item.
 
@@ -2803,19 +2533,37 @@ and a completion item with an `insertText` of `console` is provided,
 VSCode will only insert `sole`. Therefore, it is
 recommended to use `textEdit` instead since it avoids additional client
 side interpretation."""
-    insertTextFormat: InsertTextFormat | None = None
-    """The format of the insert text. The format applies to both the
+	insertTextFormat: InsertTextFormat| None = None
+	"""The format of the insert text. The format applies to both the
 `insertText` property and the `newText` property of a provided
 `textEdit`. If omitted, defaults to `InsertTextFormat.PlainText`.
 
 Please note that the insertTextFormat doesn't apply to
 `additionalTextEdits`."""
-    insertTextMode: InsertTextMode | None = None
-    """How whitespace and indentation is handled during completion
+	insertTextMode: InsertTextMode| None = None
+	"""How whitespace and indentation is handled during completion
 item insertion. If not provided, the client's default value depends on
 the `textDocument.completion.insertTextMode` client capability."""
-    textEdit: TextEdit | InsertReplaceEdit | None = None
-    """An edit which is applied to a document when selecting this completion.
+	kind: CompletionItemKind| None = None
+	"""The kind of this completion item. Based on the kind,
+an icon is chosen by the editor. The standardized set
+of available values is defined in `CompletionItemKind`."""
+	labelDetails: CompletionItemLabelDetails| None = None
+	"""Additional details for the label."""
+	preselect: bool| None = None
+	"""Select this item when showing.
+
+*Note* that only one completion item can be selected and that the
+tool / client decides which item that is. The rule is that the *first*
+item of those that match best is selected."""
+	sortText: str| None = None
+	"""A string that should be used when comparing this item
+with other items. When omitted, the label is used
+as the sort text for this item."""
+	tags: list[CompletionItemTag]| None = None
+	"""Tags for this completion item."""
+	textEdit: TextEdit | InsertReplaceEdit| None = None
+	"""An edit which is applied to a document when selecting this completion.
 When an edit is provided, the value of `insertText` is ignored.
 
 *Note:* The range of the edit must be a single line range and it must
@@ -2837,8 +2585,8 @@ consist of multiple lines.
 *Note 2:* If an `InsertReplaceEdit` is returned, the edit's insert range
 must be a prefix of the edit's replace range, meaning it must be
 contained in and starting at the same position."""
-    textEditText: str | None = None
-    """The edit text used if the completion item is part of a CompletionList and
+	textEditText: str| None = None
+	"""The edit text used if the completion item is part of a CompletionList and
 CompletionList defines an item default for the text edit range.
 
 Clients will only honor this property if they opt into completion list
@@ -2846,362 +2594,329 @@ item defaults using the capability `completionList.itemDefaults`.
 
 If not provided and a list's default range is provided, the label
 property is used as a text."""
-    additionalTextEdits: list[TextEdit] | None = None
-    """An optional array of additional text edits that are applied when
-selecting this completion. Edits must not overlap (including the same
-insert position) with the main edit nor with themselves.
-
-Additional text edits should be used to change text unrelated to the
-current cursor position (for example adding an import statement at the
-top of the file if the completion item will insert an unqualified type)."""
-    commitCharacters: list[str] | None = None
-    """An optional set of characters that, when pressed while this completion is
-active, will accept it first and then type that character. *Note* that all
-commit characters should have `length=1` and that superfluous characters
-will be ignored."""
-    command: Command | None = None
-    """An optional command that is executed *after* inserting this completion.
-*Note* that additional modifications to the current document should be
-described with the additionalTextEdits-property."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved on a completion item between
-a completion and a completion resolve request."""
-
-
 @dataclass
 class PublishDiagnosticsClientCapabilities:
-    relatedInformation: bool | None = None
-    """Whether the clients accepts diagnostics with related information."""
-    tagSupport: ClientDiagnosticsTagOptions | None = None
-    """Client supports the tag property to provide meta data about a diagnostic.
-Clients supporting tags have to handle unknown tags gracefully."""
-    versionSupport: bool | None = None
-    """Whether the client interprets the version property of the
-`textDocument/publishDiagnostics` notification's parameter."""
-    codeDescriptionSupport: bool | None = None
-    """Client supports a codeDescription property."""
-    dataSupport: bool | None = None
-    """Whether code action supports the `data` property which is
+	codeDescriptionSupport: bool| None = None
+	"""Client supports a codeDescription property."""
+	dataSupport: bool| None = None
+	"""Whether code action supports the `data` property which is
 preserved between a `textDocument/publishDiagnostics` and
 `textDocument/codeAction` request."""
-
-
+	relatedInformation: bool| None = None
+	"""Whether the clients accepts diagnostics with related information."""
+	tagSupport: ClientDiagnosticsTagOptions| None = None
+	"""Client supports the tag property to provide meta data about a diagnostic.
+Clients supporting tags have to handle unknown tags gracefully."""
+	versionSupport: bool| None = None
+	"""Whether the client interprets the version property of the
+`textDocument/publishDiagnostics` notification's parameter."""
 @dataclass
 class PublishDiagnosticsParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/publishDiagnostics"
-
-    uri: DocumentUri
-    """The URI for which diagnostic information is reported."""
-    version: integer | None = None
-    """Optionally, the version number of the document the diagnostics are
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/publishDiagnostics'
+	diagnostics: list[Diagnostic] 
+	"""An array of diagnostic information items."""
+	uri: DocumentUri 
+	"""The URI for which diagnostic information is reported."""
+	version: integer| None = None
+	"""Optionally, the version number of the document the diagnostics are
 published for."""
-    diagnostics: list[Diagnostic]
-    """An array of diagnostic information items."""
-
-
 @dataclass
 class DiagnosticClientCapabilities:
-    """Client capabilities specific to diagnostic pull requests."""
-
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration. If this is set to
+	"""Client capabilities specific to diagnostic pull requests."""
+	codeDescriptionSupport: bool| None = None
+	"""Client supports a codeDescription property"""
+	dataSupport: bool| None = None
+	"""Whether code action supports the `data` property which is
+preserved between a `textDocument/publishDiagnostics` and
+`textDocument/codeAction` request."""
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration. If this is set to
 `true`, the client supports the new
 `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
 return value for the corresponding server capability as well."""
-    relatedDocumentSupport: bool | None = None
-    """Whether the clients supports related documents for document diagnostic
+	markupMessageSupport: bool| None = None
+	"""Whether the client supports `MarkupContent` in diagnostic messages."""
+	relatedDocumentSupport: bool| None = None
+	"""Whether the clients supports related documents for document diagnostic
 pulls."""
-    relatedInformation: bool | None = None
-    """Whether the clients accepts diagnostics with related information."""
-    tagSupport: ClientDiagnosticsTagOptions | None = None
-    """Client supports the tag property to provide meta data about a diagnostic.
+	relatedInformation: bool| None = None
+	"""Whether the clients accepts diagnostics with related information."""
+	tagSupport: ClientDiagnosticsTagOptions| None = None
+	"""Client supports the tag property to provide meta data about a diagnostic.
 Clients supporting tags have to handle unknown tags gracefully."""
-    codeDescriptionSupport: bool | None = None
-    """Client supports a codeDescription property"""
-    markupMessageSupport: bool | None = None
-    """Whether the client supports `MarkupContent` in diagnostic messages."""
-    dataSupport: bool | None = None
-    """Whether code action supports the `data` property which is
-preserved between a `textDocument/publishDiagnostics` and
-`textDocument/codeAction` request."""
-
-
 @dataclass
-class DiagnosticOptions(WorkDoneProgressOptions):
-    """Diagnostic options."""
-
-    identifier: str | None = None
-    """An optional identifier under which the diagnostics are
-managed by the client."""
-    interFileDependencies: bool
-    """Whether the language has inter file dependencies, meaning that
+class DiagnosticOptions:
+	"""Diagnostic options."""
+	interFileDependencies: bool 
+	"""Whether the language has inter file dependencies, meaning that
 editing code in one file can result in a different diagnostic
 set in another file. Inter file dependencies are common for
 most programming languages and typically uncommon for linters."""
-    workspaceDiagnostics: bool
-    """The server provides support for workspace diagnostics as well."""
-
-
+	workspaceDiagnostics: bool 
+	"""The server provides support for workspace diagnostics as well."""
+	identifier: str| None = None
+	"""An optional identifier under which the diagnostics are
+managed by the client."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DiagnosticRegistrationOptions(
-    TextDocumentRegistrationOptions, DiagnosticOptions, StaticRegistrationOptions
-):
-    """Diagnostic registration options."""
-
-
+class DiagnosticRegistrationOptions:
+	"""Diagnostic registration options."""
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	interFileDependencies: bool 
+	"""Whether the language has inter file dependencies, meaning that
+editing code in one file can result in a different diagnostic
+set in another file. Inter file dependencies are common for
+most programming languages and typically uncommon for linters."""
+	workspaceDiagnostics: bool 
+	"""The server provides support for workspace diagnostics as well."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	identifier: str| None = None
+	"""An optional identifier under which the diagnostics are
+managed by the client."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentDiagnosticParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/diagnostic"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    identifier: str | None = None
-    """The additional identifier  provided during registration."""
-    previousResultId: str | None = None
-    """The result ID of a previous response, if provided."""
-
-
+class DocumentDiagnosticParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/diagnostic'
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	identifier: str| None = None
+	"""The additional identifier  provided during registration."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	previousResultId: str| None = None
+	"""The result ID of a previous response, if provided."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class FullDocumentDiagnosticReport:
-    """A diagnostic report with a full set of problems."""
-
-    kind: undefined
-    """A full document diagnostic report."""
-    resultId: str | None = None
-    """An optional result ID. If provided, it will
+	"""A diagnostic report with a full set of problems."""
+	items: list[Diagnostic] 
+	"""The actual items."""
+	kind: undefined 
+	"""A full document diagnostic report."""
+	resultId: str| None = None
+	"""An optional result ID. If provided, it will
 be sent on the next diagnostic request for the
 same document."""
-    items: list[Diagnostic]
-    """The actual items."""
-
-
 @dataclass
 class UnchangedDocumentDiagnosticReport:
-    """A diagnostic report indicating that the last returned
-    report is still accurate."""
-
-    kind: undefined
-    """A document diagnostic report indicating
+	"""A diagnostic report indicating that the last returned
+report is still accurate."""
+	kind: undefined 
+	"""A document diagnostic report indicating
 no changes to the last result. A server can
 only return `unchanged` if result IDs are
 provided."""
-    resultId: str
-    """A result ID which will be sent on the next
+	resultId: str 
+	"""A result ID which will be sent on the next
 diagnostic request for the same document."""
-
-
 @dataclass
-class RelatedFullDocumentDiagnosticReport(FullDocumentDiagnosticReport):
-    """A full diagnostic report with a set of related documents."""
-
-    relatedDocuments: (
-        Dict[str, FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport]
-        | None
-    ) = None
-    """Diagnostics of related documents. This information is useful
+class RelatedFullDocumentDiagnosticReport:
+	"""A full diagnostic report with a set of related documents."""
+	items: list[Diagnostic] 
+	"""The actual items."""
+	kind: undefined 
+	"""A full document diagnostic report."""
+	relatedDocuments: Dict[str,FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport]| None = None
+	"""Diagnostics of related documents. This information is useful
 in programming languages where code in a file A can generate
 diagnostics in a file B which A depends on. An example of
 such a language is C/C++, where macro definitions in a file
 a.cpp can result in errors in a header file b.hpp."""
-
-
+	resultId: str| None = None
+	"""An optional result ID. If provided, it will
+be sent on the next diagnostic request for the
+same document."""
 @dataclass
-class RelatedUnchangedDocumentDiagnosticReport(UnchangedDocumentDiagnosticReport):
-    """An unchanged diagnostic report with a set of related documents."""
-
-    relatedDocuments: (
-        Dict[str, FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport]
-        | None
-    ) = None
-    """Diagnostics of related documents. This information is useful
+class RelatedUnchangedDocumentDiagnosticReport:
+	"""An unchanged diagnostic report with a set of related documents."""
+	kind: undefined 
+	"""A document diagnostic report indicating
+no changes to the last result. A server can
+only return `unchanged` if result IDs are
+provided."""
+	resultId: str 
+	"""A result ID which will be sent on the next
+diagnostic request for the same document."""
+	relatedDocuments: Dict[str,FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport]| None = None
+	"""Diagnostics of related documents. This information is useful
 in programming languages where code in a file A can generate
 diagnostics in a file B which A depends on. An example of
 such a language is C/C++, where macro definitions in a file
 a.cpp can result in errors in a header file b.hpp."""
-
-
 @dataclass
 class DocumentDiagnosticReportPartialResult:
-    """A partial result for a document diagnostic report."""
-
-    relatedDocuments: Dict[
-        str, FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
-    ]
-
-
+	"""A partial result for a document diagnostic report."""
+	relatedDocuments: Dict[str,FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport] 
 @dataclass
 class DiagnosticServerCancellationData:
-    """Cancellation data returned from a diagnostic request."""
-
-    retriggerRequest: bool
-
-
+	"""Cancellation data returned from a diagnostic request."""
+	retriggerRequest: bool 
 @dataclass
-class WorkspaceDiagnosticParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/diagnostic"
-
-    identifier: str | None = None
-    """The additional identifier provided during registration."""
-    previousResultIds: list[PreviousResultId]
-    """The currently known diagnostic reports with their
+class WorkspaceDiagnosticParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/diagnostic'
+	previousResultIds: list[PreviousResultId] 
+	"""The currently known diagnostic reports with their
 previous result IDs."""
-
-
+	identifier: str| None = None
+	"""The additional identifier provided during registration."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class PreviousResultId:
-    """A previous result ID in a workspace pull request."""
-
-    uri: DocumentUri
-    """The URI for which the client knows a
+	"""A previous result ID in a workspace pull request."""
+	uri: DocumentUri 
+	"""The URI for which the client knows a
 result ID."""
-    value: str
-    """The value of the previous result ID."""
-
-
+	value: str 
+	"""The value of the previous result ID."""
 @dataclass
 class WorkspaceDiagnosticReport:
-    """A workspace diagnostic report."""
-
-    items: list[WorkspaceDocumentDiagnosticReport]
-
-
+	"""A workspace diagnostic report."""
+	items: list[WorkspaceDocumentDiagnosticReport] 
 @dataclass
-class WorkspaceFullDocumentDiagnosticReport(FullDocumentDiagnosticReport):
-    """A full document diagnostic report for a workspace diagnostic result."""
-
-    uri: DocumentUri
-    """The URI for which diagnostic information is reported."""
-    version: integer | None
-    """The version number for which the diagnostics are reported.
+class WorkspaceFullDocumentDiagnosticReport:
+	"""A full document diagnostic report for a workspace diagnostic result."""
+	items: list[Diagnostic] 
+	"""The actual items."""
+	kind: undefined 
+	"""A full document diagnostic report."""
+	uri: DocumentUri 
+	"""The URI for which diagnostic information is reported."""
+	version: integer | None 
+	"""The version number for which the diagnostics are reported.
 If the document is not marked as open, `null` can be provided."""
-
-
+	resultId: str| None = None
+	"""An optional result ID. If provided, it will
+be sent on the next diagnostic request for the
+same document."""
 @dataclass
-class WorkspaceUnchangedDocumentDiagnosticReport(UnchangedDocumentDiagnosticReport):
-    """An unchanged document diagnostic report for a workspace diagnostic result."""
-
-    uri: DocumentUri
-    """The URI for which diagnostic information is reported."""
-    version: integer | None
-    """The version number for which the diagnostics are reported.
+class WorkspaceUnchangedDocumentDiagnosticReport:
+	"""An unchanged document diagnostic report for a workspace diagnostic result."""
+	kind: undefined 
+	"""A document diagnostic report indicating
+no changes to the last result. A server can
+only return `unchanged` if result IDs are
+provided."""
+	resultId: str 
+	"""A result ID which will be sent on the next
+diagnostic request for the same document."""
+	uri: DocumentUri 
+	"""The URI for which diagnostic information is reported."""
+	version: integer | None 
+	"""The version number for which the diagnostics are reported.
 If the document is not marked as open, `null` can be provided."""
-
-
 @dataclass
 class WorkspaceDiagnosticReportPartialResult:
-    """A partial result for a workspace diagnostic report."""
-
-    items: list[WorkspaceDocumentDiagnosticReport]
-
-
+	"""A partial result for a workspace diagnostic report."""
+	items: list[WorkspaceDocumentDiagnosticReport] 
 @dataclass
 class DiagnosticWorkspaceClientCapabilities:
-    """Workspace client capabilities specific to diagnostic pull requests."""
-
-    refreshSupport: bool | None = None
-    """Whether the client implementation supports a refresh request sent from
+	"""Workspace client capabilities specific to diagnostic pull requests."""
+	refreshSupport: bool| None = None
+	"""Whether the client implementation supports a refresh request sent from
 the server to the client.
 
 Note that this event is global and will force the client to refresh all
 pulled diagnostics currently shown. It should be used with absolute care
 and is useful for situation where a server, for example, detects a project
 wide change that requires such a calculation."""
-
-
 @dataclass
 class SignatureHelpClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether signature help supports dynamic registration."""
-    signatureInformation: ClientSignatureInformationOptions | None = None
-    """The client supports the following `SignatureInformation`
-specific properties."""
-    contextSupport: bool | None = None
-    """The client supports sending additional context information for a
+	contextSupport: bool| None = None
+	"""The client supports sending additional context information for a
 `textDocument/signatureHelp` request. A client that opts into
 contextSupport will also support the `retriggerCharacters` on
 `SignatureHelpOptions`."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether signature help supports dynamic registration."""
+	signatureInformation: ClientSignatureInformationOptions| None = None
+	"""The client supports the following `SignatureInformation`
+specific properties."""
 @dataclass
-class SignatureHelpOptions(WorkDoneProgressOptions):
-    triggerCharacters: list[str] | None = None
-    """The characters that trigger signature help
-automatically."""
-    retriggerCharacters: list[str] | None = None
-    """List of characters that re-trigger signature help.
+class SignatureHelpOptions:
+	retriggerCharacters: list[str]| None = None
+	"""List of characters that re-trigger signature help.
 
 These trigger characters are only active when signature help is already
 showing. All trigger characters are also counted as re-trigger
 characters."""
-
-
+	triggerCharacters: list[str]| None = None
+	"""The characters that trigger signature help
+automatically."""
+	workDoneProgress: bool| None = None
 @dataclass
-class SignatureHelpRegistrationOptions(
-    TextDocumentRegistrationOptions, SignatureHelpOptions
-):
-    pass
+class SignatureHelpRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	retriggerCharacters: list[str]| None = None
+	"""List of characters that re-trigger signature help.
 
-
+These trigger characters are only active when signature help is already
+showing. All trigger characters are also counted as re-trigger
+characters."""
+	triggerCharacters: list[str]| None = None
+	"""The characters that trigger signature help
+automatically."""
+	workDoneProgress: bool| None = None
 @dataclass
-class SignatureHelpParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/signatureHelp"
-
-    context: SignatureHelpContext | None = None
-    """The signature help context. This is only available if the client
+class SignatureHelpParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/signatureHelp'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	context: SignatureHelpContext| None = None
+	"""The signature help context. This is only available if the client
 specifies to send this using the client capability
 `textDocument.signatureHelp.contextSupport === true`"""
-
-
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class SignatureHelpContext:
-    """Additional information about the context in which a signature help request
-    was triggered."""
-
-    triggerKind: SignatureHelpTriggerKind
-    """Action that caused signature help to be triggered."""
-    triggerCharacter: str | None = None
-    """Character that caused signature help to be triggered.
-
-This is undefined when triggerKind !==
-SignatureHelpTriggerKind.TriggerCharacter"""
-    isRetrigger: bool
-    """`true` if signature help was already showing when it was triggered.
+	"""Additional information about the context in which a signature help request
+was triggered."""
+	isRetrigger: bool 
+	"""`true` if signature help was already showing when it was triggered.
 
 Retriggers occur when the signature help is already active and can be
 caused by actions such as typing a trigger character, a cursor move, or
 document content changes."""
-    activeSignatureHelp: SignatureHelp | None = None
-    """The currently active `SignatureHelp`.
+	triggerKind: SignatureHelpTriggerKind 
+	"""Action that caused signature help to be triggered."""
+	activeSignatureHelp: SignatureHelp| None = None
+	"""The currently active `SignatureHelp`.
 
 The `activeSignatureHelp` has its `SignatureHelp.activeSignature` field
 updated based on the user navigating through available signatures."""
+	triggerCharacter: str| None = None
+	"""Character that caused signature help to be triggered.
 
-
+This is undefined when triggerKind !==
+SignatureHelpTriggerKind.TriggerCharacter"""
 @dataclass
 class SignatureHelp:
-    """Signature help represents the signature of something
-    callable. There can be multiple signatures,
-    but only one active one and only one active parameter."""
-
-    signatures: list[SignatureInformation]
-    """One or more signatures. If no signatures are available,
+	"""Signature help represents the signature of something
+callable. There can be multiple signatures,
+but only one active one and only one active parameter."""
+	signatures: list[SignatureInformation] 
+	"""One or more signatures. If no signatures are available,
 the signature help request should return `null`."""
-    activeSignature: uinteger | None = None
-    """The active signature. If omitted or the value lies outside the
-range of `signatures`, the value defaults to zero or is ignored if
-the `SignatureHelp` has no signatures.
-
-Whenever possible, implementers should make an active decision about
-the active signature and shouldn't rely on a default value.
-
-In future versions of the protocol, this property might become
-mandatory to better express this."""
-    activeParameter: uinteger | None | None = None
-    """The active parameter of the active signature.
+	activeParameter: uinteger | None| None = None
+	"""The active parameter of the active signature.
 
 If `null`, no parameter of the signature is active (for example, a named
 argument that does not match any declared parameters). This is only valid
@@ -3216,23 +2931,25 @@ If the active signature has no parameters, it is ignored.
 
 Since version 3.16.0 the `SignatureInformation` itself provides a
 `activeParameter` property and it should be used instead of this one."""
+	activeSignature: uinteger| None = None
+	"""The active signature. If omitted or the value lies outside the
+range of `signatures`, the value defaults to zero or is ignored if
+the `SignatureHelp` has no signatures.
 
+Whenever possible, implementers should make an active decision about
+the active signature and shouldn't rely on a default value.
 
+In future versions of the protocol, this property might become
+mandatory to better express this."""
 @dataclass
 class SignatureInformation:
-    """Represents the signature of something callable. A signature
-    can have a label, like a function-name, a doc-comment, and
-    a set of parameters."""
-
-    label: str
-    """The label of this signature. Will be shown in the UI."""
-    documentation: str | MarkupContent | None = None
-    """The human-readable doc-comment of this signature.
-  Will be shown in the UI but can be omitted."""
-    parameters: list[ParameterInformation] | None = None
-    """The parameters of this signature."""
-    activeParameter: uinteger | None | None = None
-    """The index of the active parameter.
+	"""Represents the signature of something callable. A signature
+can have a label, like a function-name, a doc-comment, and
+a set of parameters."""
+	label: str 
+	"""The label of this signature. Will be shown in the UI."""
+	activeParameter: uinteger | None| None = None
+	"""The index of the active parameter.
 
 If `null`, no parameter of the signature is active (for example, a named
 argument that does not match any declared parameters). This is only valid
@@ -3241,15 +2958,17 @@ since 3.18.0 and if the client specifies the client capability
 
 If provided (or `null`), this is used in place of
 `SignatureHelp.activeParameter`."""
-
-
+	documentation: str | MarkupContent| None = None
+	"""The human-readable doc-comment of this signature.
+  Will be shown in the UI but can be omitted."""
+	parameters: list[ParameterInformation]| None = None
+	"""The parameters of this signature."""
 @dataclass
 class ParameterInformation:
-    """Represents a parameter of a callable-signature. A parameter can
-    have a label and a doc-comment."""
-
-    label: str | tuple[uinteger, uinteger]
-    """The label of this parameter information.
+	"""Represents a parameter of a callable-signature. A parameter can
+have a label and a doc-comment."""
+	label: str | tuple[uinteger,uinteger] 
+	"""The label of this parameter information.
 
 Either a string or an inclusive start and exclusive end offset within
 its containing signature label (see SignatureInformation.label). The
@@ -3263,67 +2982,60 @@ controlled via `labelOffsetSupport` client capability.
 *Note*: a label of type string should be a substring of its containing
 signature label. Its intended use case is to highlight the parameter
 label part in the `SignatureInformation.label`."""
-    documentation: str | MarkupContent | None = None
-    """The human-readable doc-comment of this parameter. Will be shown
+	documentation: str | MarkupContent| None = None
+	"""The human-readable doc-comment of this parameter. Will be shown
 in the UI but can be omitted."""
-
-
 @dataclass
 class CodeActionClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether code action supports dynamic registration."""
-    codeActionLiteralSupport: ClientCodeActionLiteralOptions | None = None
-    """The client supports code action literals as a valid
+	codeActionLiteralSupport: ClientCodeActionLiteralOptions| None = None
+	"""The client supports code action literals as a valid
 response of the `textDocument/codeAction` request."""
-    isPreferredSupport: bool | None = None
-    """Whether code action supports the `isPreferred` property."""
-    disabledSupport: bool | None = None
-    """Whether code action supports the `disabled` property."""
-    dataSupport: bool | None = None
-    """Whether code action supports the `data` property which is
+	dataSupport: bool| None = None
+	"""Whether code action supports the `data` property which is
 preserved between a `textDocument/codeAction` and a
 `codeAction/resolve` request."""
-    resolveSupport: ClientCodeActionResolveOptions | None = None
-    """Whether the client supports resolving additional code action
-properties via a separate `codeAction/resolve` request."""
-    honorsChangeAnnotations: bool | None = None
-    """Whether the client honors the change annotations in
+	disabledSupport: bool| None = None
+	"""Whether code action supports the `disabled` property."""
+	documentationSupport: bool| None = None
+	"""Whether the client supports documentation for a class of code actions."""
+	dynamicRegistration: bool| None = None
+	"""Whether code action supports dynamic registration."""
+	honorsChangeAnnotations: bool| None = None
+	"""Whether the client honors the change annotations in
 text edits and resource operations returned via the
 `CodeAction#edit` property by, for example, presenting
 the workspace edit in the user interface and asking
 for confirmation."""
-    documentationSupport: bool | None = None
-    """Whether the client supports documentation for a class of code actions."""
-    tagSupport: CodeActionTagOptions | None = None
-    """Client supports the tag property on a code action. Clients
+	isPreferredSupport: bool| None = None
+	"""Whether code action supports the `isPreferred` property."""
+	resolveSupport: ClientCodeActionResolveOptions| None = None
+	"""Whether the client supports resolving additional code action
+properties via a separate `codeAction/resolve` request."""
+	tagSupport: CodeActionTagOptions| None = None
+	"""Client supports the tag property on a code action. Clients
 supporting tags have to handle unknown tags gracefully."""
-
-
 @dataclass
 class CodeActionKindDocumentation:
-    """Documentation for a class of code actions."""
-
-    kind: CodeActionKind
-    """The kind of the code action being documented.
+	"""Documentation for a class of code actions."""
+	command: Command 
+	"""[object Object],[object Object]"""
+	kind: CodeActionKind 
+	"""The kind of the code action being documented.
 
 If the kind is generic, such as `CodeActionKind.Refactor`, the
 documentation will be shown whenever any refactorings are returned. If
 the kind is more specific, such as `CodeActionKind.RefactorExtract`, the
 documentation will only be shown when extract refactoring code actions
 are returned."""
-    command: Command
-    """[object Object],[object Object]"""
-
-
 @dataclass
-class CodeActionOptions(WorkDoneProgressOptions):
-    codeActionKinds: list[CodeActionKind] | None = None
-    """CodeActionKinds that this server may return.
+class CodeActionOptions:
+	codeActionKinds: list[CodeActionKind]| None = None
+	"""CodeActionKinds that this server may return.
 
 The list of kinds may be generic, such as `CodeActionKind.Refactor`,
 or the server may list out every specific kind they provide."""
-    documentation: list[CodeActionKindDocumentation] | None = None
-    """Static documentation for a class of code actions.
+	documentation: list[CodeActionKindDocumentation]| None = None
+	"""Static documentation for a class of code actions.
 
 Documentation from the provider should be shown in the code actions
 menu if either:
@@ -3339,36 +3051,62 @@ menu if either:
 - Any code actions of `kind` are returned by the provider.
 
 At most one documentation entry should be shown per provider."""
-    resolveProvider: bool | None = None
-    """The server provides support to resolve additional
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
 information for a code action."""
-
-
+	workDoneProgress: bool| None = None
 @dataclass
-class CodeActionRegistrationOptions(TextDocumentRegistrationOptions, CodeActionOptions):
-    pass
+class CodeActionRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	codeActionKinds: list[CodeActionKind]| None = None
+	"""CodeActionKinds that this server may return.
 
+The list of kinds may be generic, such as `CodeActionKind.Refactor`,
+or the server may list out every specific kind they provide."""
+	documentation: list[CodeActionKindDocumentation]| None = None
+	"""Static documentation for a class of code actions.
 
+Documentation from the provider should be shown in the code actions
+menu if either:
+
+- Code actions of `kind` are requested by the editor. In this case,
+  the editor will show the documentation that most closely matches the
+  requested code action kind. For example, if a provider has
+  documentation for both `Refactor` and `RefactorExtract`, when the
+  user requests code actions for `RefactorExtract`, the editor will use
+  the documentation for `RefactorExtract` instead of the documentation
+  for `Refactor`.
+
+- Any code actions of `kind` are returned by the provider.
+
+At most one documentation entry should be shown per provider."""
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
+information for a code action."""
+	workDoneProgress: bool| None = None
 @dataclass
-class CodeActionParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/codeAction"
-
-    textDocument: TextDocumentIdentifier
-    """The document in which the command was invoked."""
-    range: Range
-    """The range for which the command was invoked."""
-    context: CodeActionContext
-    """Context carrying additional information."""
-
-
+class CodeActionParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/codeAction'
+	context: CodeActionContext 
+	"""Context carrying additional information."""
+	range: Range 
+	"""The range for which the command was invoked."""
+	textDocument: TextDocumentIdentifier 
+	"""The document in which the command was invoked."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class CodeActionContext:
-    """Contains additional diagnostic information about the context in which
-    a code action is run."""
-
-    diagnostics: list[Diagnostic]
-    """An array of diagnostics known on the client side overlapping the range
+	"""Contains additional diagnostic information about the context in which
+a code action is run."""
+	diagnostics: list[Diagnostic] 
+	"""An array of diagnostics known on the client side overlapping the range
 provided to the `textDocument/codeAction` request. They are provided so
 that the server knows which errors are currently presented to the user
 for the given range. There is no guarantee that these accurately reflect
@@ -3379,47 +3117,37 @@ Note that the client should check the `textDocument.diagnostic.markupMessageSupp
 server capability before sending diagnostics with markup messages to a server.
 Diagnostics with markup messages should be excluded for servers that don't support
 them."""
-    only: list[CodeActionKind] | None = None
-    """Requested kind of actions to return.
+	only: list[CodeActionKind]| None = None
+	"""Requested kind of actions to return.
 
 Actions not of this kind are filtered out by the client before being
 shown, so servers can omit computing them."""
-    triggerKind: CodeActionTriggerKind | None = None
-    """The reason why code actions were requested."""
-
-
+	triggerKind: CodeActionTriggerKind| None = None
+	"""The reason why code actions were requested."""
 @dataclass
 class CodeActionDisabled:
-    """Captures why the code action is currently disabled."""
-
-    reason: str
-    """Human readable description of why the code action is currently disabled.
+	"""Captures why the code action is currently disabled."""
+	reason: str 
+	"""Human readable description of why the code action is currently disabled.
 
 This is displayed in the code actions UI."""
-
-
 @dataclass
 class CodeAction:
-    class Meta(JSONWizard.Meta):
-        tag = "codeAction/resolve"
-
-    title: str
-    """A short, human-readable title for this code action."""
-    kind: CodeActionKind | None = None
-    """The kind of the code action.
-
-Used to filter code actions."""
-    diagnostics: list[Diagnostic] | None = None
-    """The diagnostics that this code action resolves."""
-    isPreferred: bool | None = None
-    """Marks this as a preferred action. Preferred actions are used by the
-`auto fix` command and can be targeted by keybindings.
-
-A quick fix should be marked preferred if it properly addresses the
-underlying error. A refactoring should be marked preferred if it is the
-most reasonable choice of actions to take."""
-    disabled: CodeActionDisabled | None = None
-    """Marks that the code action cannot currently be applied.
+	class Meta(JSONWizard.Meta): 
+		tag = 'codeAction/resolve'
+	title: str 
+	"""A short, human-readable title for this code action."""
+	command: Command| None = None
+	"""A command this code action executes. If a code action
+provides an edit and a command, first the edit is
+executed and then the command."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved on a code action between
+a `textDocument/codeAction` and a `codeAction/resolve` request."""
+	diagnostics: list[Diagnostic]| None = None
+	"""The diagnostics that this code action resolves."""
+	disabled: CodeActionDisabled| None = None
+	"""Marks that the code action cannot currently be applied.
 
 Clients should follow the following guidelines regarding disabled code
 actions:
@@ -3434,360 +3162,345 @@ actions:
 - If the user has a keybinding that auto applies a code action and only
   a disabled code actions are returned, the client should show the user
   an error message with `reason` in the editor."""
-    edit: WorkspaceEdit | None = None
-    """The workspace edit this code action performs."""
-    command: Command | None = None
-    """A command this code action executes. If a code action
-provides an edit and a command, first the edit is
-executed and then the command."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved on a code action between
-a `textDocument/codeAction` and a `codeAction/resolve` request."""
-    tags: list[CodeActionTag] | None = None
-    """Tags for this code action."""
+	edit: WorkspaceEdit| None = None
+	"""The workspace edit this code action performs."""
+	isPreferred: bool| None = None
+	"""Marks this as a preferred action. Preferred actions are used by the
+`auto fix` command and can be targeted by keybindings.
 
+A quick fix should be marked preferred if it properly addresses the
+underlying error. A refactoring should be marked preferred if it is the
+most reasonable choice of actions to take."""
+	kind: CodeActionKind| None = None
+	"""The kind of the code action.
 
+Used to filter code actions."""
+	tags: list[CodeActionTag]| None = None
+	"""Tags for this code action."""
 @dataclass
 class DocumentColorClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether document color supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether document color supports dynamic registration."""
 @dataclass
-class DocumentColorOptions(WorkDoneProgressOptions):
-    pass
-
-
+class DocumentColorOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentColorRegistrationOptions(
-    TextDocumentRegistrationOptions, StaticRegistrationOptions, DocumentColorOptions
-):
-    pass
-
-
+class DocumentColorRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentColorParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/documentColor"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-
-
+class DocumentColorParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/documentColor'
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class ColorInformation:
-    range: Range
-    """The range in the document where this color appears."""
-    color: Color
-    """The actual color value for this color range."""
-
-
+	color: Color 
+	"""The actual color value for this color range."""
+	range: Range 
+	"""The range in the document where this color appears."""
 @dataclass
 class Color:
-    """Represents a color in RGBA space."""
-
-    red: decimal
-    """The red component of this color in the range [0-1]."""
-    green: decimal
-    """The green component of this color in the range [0-1]."""
-    blue: decimal
-    """The blue component of this color in the range [0-1]."""
-    alpha: decimal
-    """The alpha component of this color in the range [0-1]."""
-
-
+	"""Represents a color in RGBA space."""
+	alpha: decimal 
+	"""The alpha component of this color in the range [0-1]."""
+	blue: decimal 
+	"""The blue component of this color in the range [0-1]."""
+	green: decimal 
+	"""The green component of this color in the range [0-1]."""
+	red: decimal 
+	"""The red component of this color in the range [0-1]."""
 @dataclass
-class ColorPresentationParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/colorPresentation"
-
-    textDocument: TextDocumentIdentifier
-    """The text document."""
-    color: Color
-    """The color information to request presentations for."""
-    range: Range
-    """The range where the color would be inserted. Serves as a context."""
-
-
+class ColorPresentationParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/colorPresentation'
+	color: Color 
+	"""The color information to request presentations for."""
+	range: Range 
+	"""The range where the color would be inserted. Serves as a context."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class ColorPresentation:
-    label: str
-    """The label of this color presentation. It will be shown on the color
+	label: str 
+	"""The label of this color presentation. It will be shown on the color
 picker header. By default, this is also the text that is inserted when
 selecting this color presentation."""
-    textEdit: TextEdit | None = None
-    """An [edit](#TextEdit) which is applied to a document when selecting
-this presentation for the color. When omitted, the
-[label](#ColorPresentation.label) is used."""
-    additionalTextEdits: list[TextEdit] | None = None
-    """An optional array of additional [text edits](#TextEdit) that are applied
+	additionalTextEdits: list[TextEdit]| None = None
+	"""An optional array of additional [text edits](#TextEdit) that are applied
 when selecting this color presentation. Edits must not overlap with the
 main [edit](#ColorPresentation.textEdit) nor with themselves."""
-
-
+	textEdit: TextEdit| None = None
+	"""An [edit](#TextEdit) which is applied to a document when selecting
+this presentation for the color. When omitted, the
+[label](#ColorPresentation.label) is used."""
 @dataclass
 class DocumentFormattingClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether formatting supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether formatting supports dynamic registration."""
 @dataclass
-class DocumentFormattingOptions(WorkDoneProgressOptions):
-    pass
-
-
+class DocumentFormattingOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentFormattingRegistrationOptions(
-    TextDocumentRegistrationOptions, DocumentFormattingOptions
-):
-    pass
-
-
+class DocumentFormattingRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentFormattingParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/formatting"
-
-    textDocument: TextDocumentIdentifier
-    """The document to format."""
-    options: FormattingOptions
-    """The formatting options."""
-
-
+class DocumentFormattingParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/formatting'
+	options: FormattingOptions 
+	"""The formatting options."""
+	textDocument: TextDocumentIdentifier 
+	"""The document to format."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class FormattingOptions:
-    """Value-object describing what options formatting should use."""
-
-    tabSize: uinteger
-    """Size of a tab in spaces."""
-    insertSpaces: bool
-    """Prefer spaces over tabs."""
-    trimTrailingWhitespace: bool | None = None
-    """Trim trailing whitespace on a line."""
-    insertFinalNewline: bool | None = None
-    """Insert a newline character at the end of the file if one does not exist."""
-    trimFinalNewlines: bool | None = None
-    """Trim all newlines after the final newline at the end of the file."""
-
-
+	"""Value-object describing what options formatting should use."""
+	insertSpaces: bool 
+	"""Prefer spaces over tabs."""
+	tabSize: uinteger 
+	"""Size of a tab in spaces."""
+	insertFinalNewline: bool| None = None
+	"""Insert a newline character at the end of the file if one does not exist."""
+	trimFinalNewlines: bool| None = None
+	"""Trim all newlines after the final newline at the end of the file."""
+	trimTrailingWhitespace: bool| None = None
+	"""Trim trailing whitespace on a line."""
 @dataclass
 class DocumentRangeFormattingClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether formatting supports dynamic registration."""
-    rangesSupport: bool | None = None
-    """Whether the client supports formatting multiple ranges at once."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether formatting supports dynamic registration."""
+	rangesSupport: bool| None = None
+	"""Whether the client supports formatting multiple ranges at once."""
 @dataclass
-class DocumentRangeFormattingOptions(WorkDoneProgressOptions):
-    rangesSupport: bool | None = None
-    """Whether the server supports formatting multiple ranges at once."""
-
-
+class DocumentRangeFormattingOptions:
+	rangesSupport: bool| None = None
+	"""Whether the server supports formatting multiple ranges at once."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentRangeFormattingRegistrationOptions(
-    TextDocumentRegistrationOptions, DocumentRangeFormattingOptions
-):
-    pass
-
-
+class DocumentRangeFormattingRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	rangesSupport: bool| None = None
+	"""Whether the server supports formatting multiple ranges at once."""
+	workDoneProgress: bool| None = None
 @dataclass
-class DocumentRangeFormattingParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/rangeFormatting"
-
-    textDocument: TextDocumentIdentifier
-    """The document to format."""
-    range: Range
-    """The range to format."""
-    options: FormattingOptions
-    """The formatting options."""
-
-
+class DocumentRangeFormattingParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/rangeFormatting'
+	options: FormattingOptions 
+	"""The formatting options."""
+	range: Range 
+	"""The range to format."""
+	textDocument: TextDocumentIdentifier 
+	"""The document to format."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
-class DocumentRangesFormattingParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/rangesFormatting"
-
-    textDocument: TextDocumentIdentifier
-    """The document to format."""
-    ranges: list[Range]
-    """The ranges to format."""
-    options: FormattingOptions
-    """The format options."""
-
-
+class DocumentRangesFormattingParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/rangesFormatting'
+	options: FormattingOptions 
+	"""The format options."""
+	ranges: list[Range] 
+	"""The ranges to format."""
+	textDocument: TextDocumentIdentifier 
+	"""The document to format."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class DocumentOnTypeFormattingClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether on type formatting supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Whether on type formatting supports dynamic registration."""
 @dataclass
 class DocumentOnTypeFormattingOptions:
-    firstTriggerCharacter: str
-    """A character on which formatting should be triggered, like `{`."""
-    moreTriggerCharacter: list[str] | None = None
-    """More trigger characters."""
-
-
+	firstTriggerCharacter: str 
+	"""A character on which formatting should be triggered, like `{`."""
+	moreTriggerCharacter: list[str]| None = None
+	"""More trigger characters."""
 @dataclass
-class DocumentOnTypeFormattingRegistrationOptions(
-    TextDocumentRegistrationOptions, DocumentOnTypeFormattingOptions
-):
-    pass
-
-
+class DocumentOnTypeFormattingRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	firstTriggerCharacter: str 
+	"""A character on which formatting should be triggered, like `{`."""
+	moreTriggerCharacter: list[str]| None = None
+	"""More trigger characters."""
 @dataclass
 class DocumentOnTypeFormattingParams:
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/onTypeFormatting"
-
-    textDocument: TextDocumentIdentifier
-    """The document to format."""
-    position: Position
-    """The position around which the on type formatting should happen.
-This is not necessarily the exact position where the character denoted
-by the property `ch` got typed."""
-    ch: str
-    """The character that has been typed that triggered the formatting
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/onTypeFormatting'
+	ch: str 
+	"""The character that has been typed that triggered the formatting
 on type request. That is not necessarily the last character that
 got inserted into the document since the client could auto insert
 characters as well (e.g. automatic brace completion)."""
-    options: FormattingOptions
-    """The formatting options."""
-
-
+	options: FormattingOptions 
+	"""The formatting options."""
+	position: Position 
+	"""The position around which the on type formatting should happen.
+This is not necessarily the exact position where the character denoted
+by the property `ch` got typed."""
+	textDocument: TextDocumentIdentifier 
+	"""The document to format."""
 @dataclass
 class RenameClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether rename supports dynamic registration."""
-    prepareSupport: bool | None = None
-    """Client supports testing for validity of rename operations
-before execution."""
-    prepareSupportDefaultBehavior: PrepareSupportDefaultBehavior | None = None
-    """Client supports the default behavior result
-(`{ defaultBehavior: boolean }`).
-
-The value indicates the default behavior used by the
-client."""
-    honorsChangeAnnotations: bool | None = None
-    """Whether the client honors the change annotations in
+	dynamicRegistration: bool| None = None
+	"""Whether rename supports dynamic registration."""
+	honorsChangeAnnotations: bool| None = None
+	"""Whether the client honors the change annotations in
 text edits and resource operations returned via the
 rename request's workspace edit by, for example, presenting
 the workspace edit in the user interface and asking
 for confirmation."""
+	prepareSupport: bool| None = None
+	"""Client supports testing for validity of rename operations
+before execution."""
+	prepareSupportDefaultBehavior: PrepareSupportDefaultBehavior| None = None
+	"""Client supports the default behavior result
+(`{ defaultBehavior: boolean }`).
 
-
+The value indicates the default behavior used by the
+client."""
 @dataclass
-class RenameOptions(WorkDoneProgressOptions):
-    prepareProvider: bool | None = None
-    """Renames should be checked and tested before being executed."""
-
-
+class RenameOptions:
+	prepareProvider: bool| None = None
+	"""Renames should be checked and tested before being executed."""
+	workDoneProgress: bool| None = None
 @dataclass
-class RenameRegistrationOptions(TextDocumentRegistrationOptions, RenameOptions):
-    pass
-
-
+class RenameRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	prepareProvider: bool| None = None
+	"""Renames should be checked and tested before being executed."""
+	workDoneProgress: bool| None = None
 @dataclass
-class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/rename"
-
-    newName: str
-    """The new name of the symbol. If the given name is not valid, the
+class RenameParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/rename'
+	newName: str 
+	"""The new name of the symbol. If the given name is not valid, the
 request must return a [ResponseError](#ResponseError) with an
 appropriate message set."""
-
-
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
-class PrepareRenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/prepareRename"
-
-
+class PrepareRenameParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/prepareRename'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class LinkedEditingRangeClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Whether the implementation supports dynamic registration.
+	dynamicRegistration: bool| None = None
+	"""Whether the implementation supports dynamic registration.
 If this is set to `true` the client supports the new
 `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
 return value for the corresponding server capability as well."""
-
-
 @dataclass
-class LinkedEditingRangeOptions(WorkDoneProgressOptions):
-    pass
-
-
+class LinkedEditingRangeOptions:
+	workDoneProgress: bool| None = None
 @dataclass
-class LinkedEditingRangeRegistrationOptions(
-    TextDocumentRegistrationOptions,
-    LinkedEditingRangeOptions,
-    StaticRegistrationOptions,
-):
-    pass
-
-
+class LinkedEditingRangeRegistrationOptions:
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class LinkedEditingRangeParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/linkedEditingRange"
-
-
+class LinkedEditingRangeParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/linkedEditingRange'
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class LinkedEditingRanges:
-    ranges: list[Range]
-    """A list of ranges that can be renamed together. The ranges must have
+	ranges: list[Range] 
+	"""A list of ranges that can be renamed together. The ranges must have
 identical length and contain identical text content. The ranges cannot
 overlap."""
-    wordPattern: str | None = None
-    """An optional word pattern (regular expression) that describes valid
+	wordPattern: str| None = None
+	"""An optional word pattern (regular expression) that describes valid
 contents for the given ranges. If no pattern is provided, the client
 configuration's word pattern will be used."""
-
-
 @dataclass
 class InlineCompletionClientCapabilities:
-    """Client capabilities specific to inline completions."""
-
-    dynamicRegistration: bool | None = None
-    """Whether implementation supports dynamic registration for inline
+	"""Client capabilities specific to inline completions."""
+	dynamicRegistration: bool| None = None
+	"""Whether implementation supports dynamic registration for inline
 completion providers."""
-
-
 @dataclass
-class InlineCompletionOptions(WorkDoneProgressOptions):
-    """Inline completion options used during static registration."""
-
-
+class InlineCompletionOptions:
+	"""Inline completion options used during static registration."""
+	workDoneProgress: bool| None = None
 @dataclass
-class InlineCompletionRegistrationOptions(
-    InlineCompletionOptions, TextDocumentRegistrationOptions, StaticRegistrationOptions
-):
-    """Inline completion options used during static or dynamic registration."""
-
-
+class InlineCompletionRegistrationOptions:
+	"""Inline completion options used during static or dynamic registration."""
+	documentSelector: DocumentSelector | None 
+	"""A document selector to identify the scope of the registration. If set to
+null, the document selector provided on the client side will be used."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
+	workDoneProgress: bool| None = None
 @dataclass
-class InlineCompletionParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "textDocument/inlineCompletion"
-
-    context: InlineCompletionContext
-    """Additional information about the context in which inline completions
+class InlineCompletionParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'textDocument/inlineCompletion'
+	context: InlineCompletionContext 
+	"""Additional information about the context in which inline completions
 were requested."""
-
-
+	position: Position 
+	"""The position inside the text document."""
+	textDocument: TextDocumentIdentifier 
+	"""The text document."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class InlineCompletionContext:
-    """Provides information about the context in which an inline completion was
-    requested."""
-
-    triggerKind: InlineCompletionTriggerKind
-    """Describes how the inline completion was triggered."""
-    selectedCompletionInfo: SelectedCompletionInfo | None = None
-    """Provides information about the currently selected item in the
+	"""Provides information about the context in which an inline completion was
+requested."""
+	triggerKind: InlineCompletionTriggerKind 
+	"""Describes how the inline completion was triggered."""
+	selectedCompletionInfo: SelectedCompletionInfo| None = None
+	"""Provides information about the currently selected item in the
 autocomplete widget if it is visible.
 
 If set, provided inline completions must extend the text of the
@@ -3799,82 +3512,68 @@ also replace `.` and start with `.log`, for example `.log()`.
 
 Inline completion providers are requested again whenever the selected
 item changes."""
-
-
 @dataclass
 class SelectedCompletionInfo:
-    """Describes the currently selected completion item."""
-
-    range: Range
-    """The range that will be replaced if this completion item is accepted."""
-    text: str
-    """The text the range will be replaced with if this completion is
+	"""Describes the currently selected completion item."""
+	range: Range 
+	"""The range that will be replaced if this completion item is accepted."""
+	text: str 
+	"""The text the range will be replaced with if this completion is
 accepted."""
-
-
 @dataclass
 class InlineCompletionList:
-    """[object Object],[object Object],[object Object]"""
-
-    items: list[InlineCompletionItem]
-    """The inline completion items."""
-
-
+	"""Represents a collection of inline completion * items} to be presented in the editor."""
+	items: list[InlineCompletionItem] 
+	"""The inline completion items."""
 @dataclass
 class InlineCompletionItem:
-    """An inline completion item represents a text snippet that is proposed inline
-    to complete text that is being typed."""
-
-    insertText: str | StringValue
-    """The text to replace the range with. Must be set.
+	"""An inline completion item represents a text snippet that is proposed inline
+to complete text that is being typed."""
+	insertText: str | StringValue 
+	"""The text to replace the range with. Must be set.
 Is used both for the preview and the accept operation."""
-    filterText: str | None = None
-    """[object Object],[object Object],[object Object]"""
-    range: Range | None = None
-    """The range to replace.
+	command: Command| None = None
+	"""[object Object],[object Object],[object Object]"""
+	filterText: str| None = None
+	"""[object Object],[object Object],[object Object]"""
+	range: Range| None = None
+	"""The range to replace.
 Must begin and end on the same line.
 
 Prefer replacements over insertions to provide a better experience when
 the user deletes typed text."""
-    command: Command | None = None
-    """[object Object],[object Object],[object Object]"""
-
-
 @dataclass
 class WorkspaceSymbolClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Symbol request supports dynamic registration."""
-    symbolKind: ClientSymbolKindOptions | None = None
-    """Specific capabilities for the `SymbolKind` in the `workspace/symbol`
-request."""
-    tagSupport: ClientSymbolTagOptions | None = None
-    """The client supports tags on `SymbolInformation` and `WorkspaceSymbol`.
-Clients supporting tags have to handle unknown tags gracefully."""
-    resolveSupport: ClientSymbolResolveOptions | None = None
-    """The client supports partial workspace symbols. The client will send the
+	dynamicRegistration: bool| None = None
+	"""Symbol request supports dynamic registration."""
+	resolveSupport: ClientSymbolResolveOptions| None = None
+	"""The client supports partial workspace symbols. The client will send the
 request `workspaceSymbol/resolve` to the server to resolve additional
 properties."""
-
-
+	symbolKind: ClientSymbolKindOptions| None = None
+	"""Specific capabilities for the `SymbolKind` in the `workspace/symbol`
+request."""
+	tagSupport: ClientSymbolTagOptions| None = None
+	"""The client supports tags on `SymbolInformation` and `WorkspaceSymbol`.
+Clients supporting tags have to handle unknown tags gracefully."""
 @dataclass
-class WorkspaceSymbolOptions(WorkDoneProgressOptions):
-    resolveProvider: bool | None = None
-    """The server provides support to resolve additional
+class WorkspaceSymbolOptions:
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
 information for a workspace symbol."""
-
-
+	workDoneProgress: bool| None = None
 @dataclass
-class WorkspaceSymbolRegistrationOptions(WorkspaceSymbolOptions):
-    pass
-
-
+class WorkspaceSymbolRegistrationOptions:
+	resolveProvider: bool| None = None
+	"""The server provides support to resolve additional
+information for a workspace symbol."""
+	workDoneProgress: bool| None = None
 @dataclass
-class WorkspaceSymbolParams(WorkDoneProgressParams, PartialResultParams):
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/symbol"
-
-    query: str
-    """A query string to filter symbols by. Clients may send an empty
+class WorkspaceSymbolParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/symbol'
+	query: str 
+	"""A query string to filter symbols by. Clients may send an empty
 string here to request all symbols.
 
 The `query`-parameter should be interpreted in a *relaxed way* as editors
@@ -3882,131 +3581,104 @@ will apply their own highlighting and scoring on the results. A good rule
 of thumb is to match case-insensitive and to simply check that the
 characters of *query* appear in their order in a candidate symbol.
 Servers shouldn't use prefix, substring, or similar strict matching."""
-
-
+	partialResultToken: ProgressToken| None = None
+	"""An optional token that a server can use to report partial results (e.g.
+streaming) to the client."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class WorkspaceSymbol:
-    class Meta(JSONWizard.Meta):
-        tag = "workspaceSymbol/resolve"
-
-    name: str
-    """The name of this symbol."""
-    kind: SymbolKind
-    """The kind of this symbol."""
-    tags: list[SymbolTag] | None = None
-    """Tags for this completion item."""
-    containerName: str | None = None
-    """The name of the symbol containing this symbol. This information is for
-user interface purposes (e.g. to render a qualifier in the user interface
-if necessary). It can't be used to re-infer a hierarchy for the document
-symbols."""
-    location: Location | LocationUriOnly
-    """The location of this symbol. Whether a server is allowed to
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspaceSymbol/resolve'
+	kind: SymbolKind 
+	"""The kind of this symbol."""
+	location: Location | LocationUriOnly 
+	"""The location of this symbol. Whether a server is allowed to
 return a location without a range depends on the client
 capability `workspace.symbol.resolveSupport`.
 
 See also `SymbolInformation.location`."""
-    data: LSPAny | None = None
-    """A data entry field that is preserved on a workspace symbol between a
+	name: str 
+	"""The name of this symbol."""
+	containerName: str| None = None
+	"""The name of the symbol containing this symbol. This information is for
+user interface purposes (e.g. to render a qualifier in the user interface
+if necessary). It can't be used to re-infer a hierarchy for the document
+symbols."""
+	data: LSPAny| None = None
+	"""A data entry field that is preserved on a workspace symbol between a
 workspace symbol request and a workspace symbol resolve request."""
-
-
+	tags: list[SymbolTag]| None = None
+	"""Tags for this completion item."""
 @dataclass
 class ConfigurationParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/configuration"
-
-    items: list[ConfigurationItem]
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/configuration'
+	items: list[ConfigurationItem] 
 @dataclass
 class ConfigurationItem:
-    scopeUri: URI | None = None
-    """The scope to get the configuration section for."""
-    section: str | None = None
-    """The configuration section asked for."""
-
-
+	scopeUri: URI| None = None
+	"""The scope to get the configuration section for."""
+	section: str| None = None
+	"""The configuration section asked for."""
 @dataclass
 class DidChangeConfigurationClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Did change configuration notification supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Did change configuration notification supports dynamic registration."""
 @dataclass
 class DidChangeConfigurationParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/didChangeConfiguration"
-
-    settings: LSPAny
-    """The actual changed settings."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/didChangeConfiguration'
+	settings: LSPAny 
+	"""The actual changed settings."""
 @dataclass
 class WorkspaceFoldersServerCapabilities:
-    supported: bool | None = None
-    """The server has support for workspace folders."""
-    changeNotifications: str | bool | None = None
-    """Whether the server wants to receive workspace folder
+	changeNotifications: str | bool| None = None
+	"""Whether the server wants to receive workspace folder
 change notifications.
 
 If a string is provided, the string is treated as an ID
 under which the notification is registered on the client
 side. The ID can be used to unregister for these events
 using the `client/unregisterCapability` request."""
-
-
+	supported: bool| None = None
+	"""The server has support for workspace folders."""
 @dataclass
 class WorkspaceFolder:
-    uri: URI
-    """The associated URI for this workspace folder."""
-    name: str
-    """The name of the workspace folder. Used to refer to this
+	name: str 
+	"""The name of the workspace folder. Used to refer to this
 workspace folder in the user interface."""
-
-
+	uri: URI 
+	"""The associated URI for this workspace folder."""
 @dataclass
 class DidChangeWorkspaceFoldersParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/didChangeWorkspaceFolders"
-
-    event: WorkspaceFoldersChangeEvent
-    """The actual workspace folder change event."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/didChangeWorkspaceFolders'
+	event: WorkspaceFoldersChangeEvent 
+	"""The actual workspace folder change event."""
 @dataclass
 class WorkspaceFoldersChangeEvent:
-    """The workspace folder change event."""
-
-    added: list[WorkspaceFolder]
-    """The array of added workspace folders."""
-    removed: list[WorkspaceFolder]
-    """The array of removed workspace folders."""
-
-
+	"""The workspace folder change event."""
+	added: list[WorkspaceFolder] 
+	"""The array of added workspace folders."""
+	removed: list[WorkspaceFolder] 
+	"""The array of removed workspace folders."""
 @dataclass
 class FileOperationRegistrationOptions:
-    """The options to register for file operations."""
-
-    filters: list[FileOperationFilter]
-    """The actual filters."""
-
-
+	"""The options to register for file operations."""
+	filters: list[FileOperationFilter] 
+	"""The actual filters."""
 @dataclass
 class FileOperationPatternOptions:
-    """Matching options for the file operation pattern."""
-
-    ignoreCase: bool | None = None
-    """The pattern should be matched ignoring casing."""
-
-
+	"""Matching options for the file operation pattern."""
+	ignoreCase: bool| None = None
+	"""The pattern should be matched ignoring casing."""
 @dataclass
 class FileOperationPattern:
-    """A pattern to describe in which file operation requests or notifications
-    the server is interested in."""
-
-    glob: str
-    """The glob pattern to match. Glob patterns can have the following syntax:
+	"""A pattern to describe in which file operation requests or notifications
+the server is interested in."""
+	glob: str 
+	"""The glob pattern to match. Glob patterns can have the following syntax:
 - `*` to match zero or more characters in a path segment
 - `?` to match on one character in a path segment
 - `**` to match any number of path segments, including none
@@ -4017,1015 +3689,704 @@ class FileOperationPattern:
 - `[!...]` to negate a range of characters to match in a path segment
   (e.g., `example.[!0-9]` to match on `example.a`, `example.b`, but
   not `example.0`)"""
-    matches: FileOperationPatternKind | None = None
-    """Whether to match files or folders with this pattern.
+	matches: FileOperationPatternKind| None = None
+	"""Whether to match files or folders with this pattern.
 
 Matches both if undefined."""
-    options: FileOperationPatternOptions | None = None
-    """Additional options used during matching."""
-
-
+	options: FileOperationPatternOptions| None = None
+	"""Additional options used during matching."""
 @dataclass
 class FileOperationFilter:
-    """A filter to describe in which file operation requests or notifications
-    the server is interested in."""
-
-    scheme: str | None = None
-    """A URI scheme, like `file` or `untitled`."""
-    pattern: FileOperationPattern
-    """The actual file operation pattern."""
-
-
+	"""A filter to describe in which file operation requests or notifications
+the server is interested in."""
+	pattern: FileOperationPattern 
+	"""The actual file operation pattern."""
+	scheme: str| None = None
+	"""A URI scheme, like `file` or `untitled`."""
 @dataclass
 class CreateFilesParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/didCreateFiles"
-
-    files: list[FileCreate]
-    """An array of all files/folders created in this operation."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/didCreateFiles'
+	files: list[FileCreate] 
+	"""An array of all files/folders created in this operation."""
 @dataclass
 class FileCreate:
-    """Represents information on a file/folder create."""
-
-    uri: str
-    """A file:// URI for the location of the file/folder being created."""
-
-
+	"""Represents information on a file/folder create."""
+	uri: str 
+	"""A file:// URI for the location of the file/folder being created."""
 @dataclass
 class RenameFilesParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/didRenameFiles"
-
-    files: list[FileRename]
-    """An array of all files/folders renamed in this operation. When a folder
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/didRenameFiles'
+	files: list[FileRename] 
+	"""An array of all files/folders renamed in this operation. When a folder
 is renamed, only the folder will be included, and not its children."""
-
-
 @dataclass
 class FileRename:
-    """Represents information on a file/folder rename."""
-
-    oldUri: str
-    """A file:// URI for the original location of the file/folder being renamed."""
-    newUri: str
-    """A file:// URI for the new location of the file/folder being renamed."""
-
-
+	"""Represents information on a file/folder rename."""
+	newUri: str 
+	"""A file:// URI for the new location of the file/folder being renamed."""
+	oldUri: str 
+	"""A file:// URI for the original location of the file/folder being renamed."""
 @dataclass
 class DeleteFilesParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/didDeleteFiles"
-
-    files: list[FileDelete]
-    """An array of all files/folders deleted in this operation."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/didDeleteFiles'
+	files: list[FileDelete] 
+	"""An array of all files/folders deleted in this operation."""
 @dataclass
 class FileDelete:
-    """Represents information on a file/folder delete."""
-
-    uri: str
-    """A file:// URI for the location of the file/folder being deleted."""
-
-
+	"""Represents information on a file/folder delete."""
+	uri: str 
+	"""A file:// URI for the location of the file/folder being deleted."""
 @dataclass
 class DidChangeWatchedFilesClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Did change watched files notification supports dynamic registration.
+	dynamicRegistration: bool| None = None
+	"""Did change watched files notification supports dynamic registration.
 Please note that the current protocol doesn't support static
 configuration for file changes from the server side."""
-    relativePatternSupport: bool | None = None
-    """Whether the client has support for relative patterns
+	relativePatternSupport: bool| None = None
+	"""Whether the client has support for relative patterns
 or not."""
-
-
 @dataclass
 class DidChangeWatchedFilesRegistrationOptions:
-    """Describe options to be used when registering for file system change events."""
-
-    watchers: list[FileSystemWatcher]
-    """The watchers to register."""
-
-
+	"""Describe options to be used when registering for file system change events."""
+	watchers: list[FileSystemWatcher] 
+	"""The watchers to register."""
 @dataclass
 class FileSystemWatcher:
-    globPattern: GlobPattern
-    """[object Object],[object Object],[object Object]"""
-    kind: WatchKind | None = None
-    """The kind of events of interest. If omitted, it defaults
+	globPattern: GlobPattern 
+	"""[object Object],[object Object],[object Object]"""
+	kind: WatchKind| None = None
+	"""The kind of events of interest. If omitted, it defaults
 to WatchKind.Create | WatchKind.Change | WatchKind.Delete
 which is 7."""
-
-
 @dataclass
 class DidChangeWatchedFilesParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/didChangeWatchedFiles"
-
-    changes: list[FileEvent]
-    """The actual file events."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/didChangeWatchedFiles'
+	changes: list[FileEvent] 
+	"""The actual file events."""
 @dataclass
 class FileEvent:
-    """An event describing a file change."""
-
-    uri: DocumentUri
-    """The file's URI."""
-    type: FileChangeType
-    """The change type."""
-
-
+	"""An event describing a file change."""
+	type: FileChangeType 
+	"""The change type."""
+	uri: DocumentUri 
+	"""The file's URI."""
 @dataclass
 class ExecuteCommandClientCapabilities:
-    dynamicRegistration: bool | None = None
-    """Execute command supports dynamic registration."""
-
-
+	dynamicRegistration: bool| None = None
+	"""Execute command supports dynamic registration."""
 @dataclass
-class ExecuteCommandOptions(WorkDoneProgressOptions):
-    commands: list[str]
-    """The commands to be executed on the server."""
-
-
+class ExecuteCommandOptions:
+	commands: list[str] 
+	"""The commands to be executed on the server."""
+	workDoneProgress: bool| None = None
 @dataclass
-class ExecuteCommandRegistrationOptions(ExecuteCommandOptions):
-    """Execute command registration options."""
-
-
+class ExecuteCommandRegistrationOptions:
+	"""Execute command registration options."""
+	commands: list[str] 
+	"""The commands to be executed on the server."""
+	workDoneProgress: bool| None = None
 @dataclass
-class ExecuteCommandParams(WorkDoneProgressParams):
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/executeCommand"
-
-    command: str
-    """The identifier of the actual command handler."""
-    arguments: list[LSPAny] | None = None
-    """Arguments that the command should be invoked with."""
-
-
+class ExecuteCommandParams:
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/executeCommand'
+	command: str 
+	"""The identifier of the actual command handler."""
+	arguments: list[LSPAny]| None = None
+	"""Arguments that the command should be invoked with."""
+	workDoneToken: ProgressToken| None = None
+	"""An optional token that a server can use to report work done progress."""
 @dataclass
 class ApplyWorkspaceEditParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/applyEdit"
-
-    label: str | None = None
-    """An optional label of the workspace edit. This label is
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/applyEdit'
+	edit: WorkspaceEdit 
+	"""The edits to apply."""
+	label: str| None = None
+	"""An optional label of the workspace edit. This label is
 presented in the user interface, for example, on an undo
 stack to undo the workspace edit."""
-    edit: WorkspaceEdit
-    """The edits to apply."""
-    metadata: WorkspaceEditMetadata | None = None
-    """Additional data about the edit."""
-
-
+	metadata: WorkspaceEditMetadata| None = None
+	"""Additional data about the edit."""
 @dataclass
 class WorkspaceEditMetadata:
-    """Additional data about a workspace edit."""
-
-    isRefactoring: bool | None = None
-    """Signal to the editor that this edit is a refactoring."""
-
-
+	"""Additional data about a workspace edit."""
+	isRefactoring: bool| None = None
+	"""Signal to the editor that this edit is a refactoring."""
 @dataclass
 class ApplyWorkspaceEditResult:
-    applied: bool
-    """Indicates whether the edit was applied or not."""
-    failureReason: str | None = None
-    """An optional textual description for why the edit was not applied.
-This may be used by the server for diagnostic logging or to provide
-a suitable error for a request that triggered the edit."""
-    failedChange: uinteger | None = None
-    """Depending on the client's failure handling strategy, `failedChange`
+	applied: bool 
+	"""Indicates whether the edit was applied or not."""
+	failedChange: uinteger| None = None
+	"""Depending on the client's failure handling strategy, `failedChange`
 might contain the index of the change that failed. This property is
 only available if the client signals a `failureHandling` strategy
 in its client capabilities."""
-
-
+	failureReason: str| None = None
+	"""An optional textual description for why the edit was not applied.
+This may be used by the server for diagnostic logging or to provide
+a suitable error for a request that triggered the edit."""
 @dataclass
-class TextDocumentContentRegistrationOptions(
-    TextDocumentContentOptions, StaticRegistrationOptions
-):
-    """Text document content provider registration options."""
-
-
+class TextDocumentContentClientCapabilities:
+	"""Client capabilities for a text document content provider."""
+	dynamicRegistration: bool| None = None
+	"""Text document content provider supports dynamic registration."""
+@dataclass
+class TextDocumentContentOptions:
+	"""Text document content provider options."""
+	schemes: list[str] 
+	"""The schemes for which the server provides content."""
+@dataclass
+class TextDocumentContentRegistrationOptions:
+	"""Text document content provider registration options."""
+	schemes: list[str] 
+	"""The schemes for which the server provides content."""
+	id: str| None = None
+	"""The id used to register the request. The id can be used to deregister
+the request again. See also Registration#id."""
 @dataclass
 class TextDocumentContentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/textDocumentContent"
-
-    uri: DocumentUri
-    """The uri of the text document."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/textDocumentContent'
+	uri: DocumentUri 
+	"""The uri of the text document."""
 @dataclass
 class TextDocumentContentResult:
-    """Result of the `workspace/textDocumentContent` request."""
-
-    text: str
-    """The text content of the text document. Please note, that the content of
+	"""Result of the `workspace/textDocumentContent` request."""
+	text: str 
+	"""The text content of the text document. Please note, that the content of
 any subsequent open notifications for the text document might differ
 from the returned content due to whitespace and line ending
 normalizations done on the client"""
-
-
 @dataclass
 class TextDocumentContentRefreshParams:
-    class Meta(JSONWizard.Meta):
-        tag = "workspace/textDocumentContent/refresh"
-
-    uri: DocumentUri
-    """The uri of the text document to refresh."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'workspace/textDocumentContent/refresh'
+	uri: DocumentUri 
+	"""The uri of the text document to refresh."""
 @dataclass
 class ShowMessageParams:
-    class Meta(JSONWizard.Meta):
-        tag = "window/showMessage"
-
-    type: MessageType
-    """[object Object],[object Object],[object Object]"""
-    message: str
-    """The actual message."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'window/showMessage'
+	message: str 
+	"""The actual message."""
+	type: MessageType 
+	"""[object Object],[object Object],[object Object]"""
 @dataclass
 class ShowMessageRequestClientCapabilities:
-    """Show message request client capabilities"""
-
-    messageActionItem: ClientShowMessageActionItemOptions | None = None
-    """Capabilities specific to the `MessageActionItem` type."""
-
-
+	"""Show message request client capabilities"""
+	messageActionItem: ClientShowMessageActionItemOptions| None = None
+	"""Capabilities specific to the `MessageActionItem` type."""
 @dataclass
 class ShowMessageRequestParams:
-    class Meta(JSONWizard.Meta):
-        tag = "window/showMessageRequest"
-
-    type: MessageType
-    """[object Object],[object Object],[object Object]"""
-    message: str
-    """The actual message."""
-    actions: list[MessageActionItem] | None = None
-    """The message action items to present."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'window/showMessageRequest'
+	message: str 
+	"""The actual message."""
+	type: MessageType 
+	"""[object Object],[object Object],[object Object]"""
+	actions: list[MessageActionItem]| None = None
+	"""The message action items to present."""
 @dataclass
 class MessageActionItem:
-    title: str
-    """A short title like 'Retry', 'Open Log' etc."""
-
-
+	title: str 
+	"""A short title like 'Retry', 'Open Log' etc."""
 @dataclass
 class ShowDocumentClientCapabilities:
-    """Client capabilities for the show document request."""
-
-    support: bool
-    """The client has support for the show document
+	"""Client capabilities for the show document request."""
+	support: bool 
+	"""The client has support for the show document
 request."""
-
-
 @dataclass
 class ShowDocumentParams:
-    class Meta(JSONWizard.Meta):
-        tag = "window/showDocument"
-
-    uri: URI
-    """The URI to show."""
-    external: bool | None = None
-    """Indicates to show the resource in an external program.
+	class Meta(JSONWizard.Meta): 
+		tag = 'window/showDocument'
+	uri: URI 
+	"""The URI to show."""
+	external: bool| None = None
+	"""Indicates to show the resource in an external program.
 To show, for example, `https://code.visualstudio.com/`
 in the default web browser, set `external` to `true`."""
-    takeFocus: bool | None = None
-    """An optional property to indicate whether the editor
-showing the document should take focus or not.
-Clients might ignore this property if an external
-program is started."""
-    selection: Range | None = None
-    """An optional selection range if the document is a text
+	selection: Range| None = None
+	"""An optional selection range if the document is a text
 document. Clients might ignore this property if an
 external program is started or the file is not a text
 file."""
-
-
+	takeFocus: bool| None = None
+	"""An optional property to indicate whether the editor
+showing the document should take focus or not.
+Clients might ignore this property if an external
+program is started."""
 @dataclass
 class ShowDocumentResult:
-    """The result of a show document request."""
-
-    success: bool
-    """A boolean indicating if the show was successful."""
-
-
+	"""The result of a show document request."""
+	success: bool 
+	"""A boolean indicating if the show was successful."""
 @dataclass
 class LogMessageParams:
-    class Meta(JSONWizard.Meta):
-        tag = "window/logMessage"
-
-    type: MessageType
-    """[object Object],[object Object],[object Object]"""
-    message: str
-    """The actual message."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'window/logMessage'
+	message: str 
+	"""The actual message."""
+	type: MessageType 
+	"""[object Object],[object Object],[object Object]"""
 @dataclass
 class WorkDoneProgressCreateParams:
-    class Meta(JSONWizard.Meta):
-        tag = "window/workDoneProgress/create"
-
-    token: ProgressToken
-    """The token to be used to report progress."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'window/workDoneProgress/create'
+	token: ProgressToken 
+	"""The token to be used to report progress."""
 @dataclass
 class WorkDoneProgressCancelParams:
-    class Meta(JSONWizard.Meta):
-        tag = "window/workDoneProgress/cancel"
-
-    token: ProgressToken
-    """The token to be used to report progress."""
-
-
+	class Meta(JSONWizard.Meta): 
+		tag = 'window/workDoneProgress/cancel'
+	token: ProgressToken 
+	"""The token to be used to report progress."""
 class ErrorCodes(Enum):
-    ParseError = -32700
-    InvalidRequest = -32600
-    MethodNotFound = -32601
-    InvalidParams = -32602
-    InternalError = -32603
-    jsonrpcReservedErrorRangeStart = -32099
-    serverErrorStart = -32099
-    ServerNotInitialized = -32002
-    UnknownErrorCode = -32001
-    jsonrpcReservedErrorRangeEnd = -32000
-    serverErrorEnd = -32000
-    lspReservedErrorRangeStart = -32899
-    RequestFailed = -32803
-    ServerCancelled = -32802
-    ContentModified = -32801
-    RequestCancelled = -32800
-    lspReservedErrorRangeEnd = -32800
-
-
+	ParseError = -32700 
+	InvalidRequest = -32600 
+	MethodNotFound = -32601 
+	InvalidParams = -32602 
+	InternalError = -32603 
+	jsonrpcReservedErrorRangeStart = -32099 
+	serverErrorStart = -32099 
+	ServerNotInitialized = -32002 
+	UnknownErrorCode = -32001 
+	jsonrpcReservedErrorRangeEnd = -32000 
+	serverErrorEnd = -32000 
+	lspReservedErrorRangeStart = -32899 
+	RequestFailed = -32803 
+	ServerCancelled = -32802 
+	ContentModified = -32801 
+	RequestCancelled = -32800 
+	lspReservedErrorRangeEnd = -32800 
 class RegularExpressionEngineKind(Enum):
-    """Regular Expression Engines"""
-
-    ES2020 = "ES2020"
-
-
+	"""Regular Expression Engines"""
+	ES2020 = 'ES2020'
 class PositionEncodingKind(Enum):
-    """A set of predefined position encoding kinds."""
-
-    UTF8 = "utf-8"
-    UTF16 = "utf-16"
-    UTF32 = "utf-32"
-
-
+	"""A set of predefined position encoding kinds."""
+	UTF8 = 'utf-8'
+	UTF16 = 'utf-16'
+	UTF32 = 'utf-32'
 class DiagnosticSeverity(Enum):
-    Error = 1
-    Warning = 2
-    Information = 3
-    Hint = 4
-
-
+	Error = 1 
+	Warning = 2 
+	Information = 3 
+	Hint = 4 
 class DiagnosticTag(Enum):
-    """The diagnostic tags."""
-
-    Unnecessary = 1
-    Deprecated = 2
-
-
+	"""The diagnostic tags."""
+	Unnecessary = 1 
+	Deprecated = 2 
 class MarkupKind(Enum):
-    """Describes the content type that a client supports in various
-    result literals like `Hover`, `ParameterInfo` or `CompletionItem`.
+	"""Describes the content type that a client supports in various
+result literals like `Hover`, `ParameterInfo` or `CompletionItem`.
 
-    Please note that `MarkupKinds` must not start with a `$`. These kinds
-    are reserved for internal usage."""
-
-    PlainText = "plaintext"
-    Markdown = "markdown"
-
-
+Please note that `MarkupKinds` must not start with a `$`. These kinds
+are reserved for internal usage."""
+	PlainText = 'plaintext'
+	Markdown = 'markdown'
 class ResourceOperationKind(Enum):
-    Create = "create"
-    Rename = "rename"
-    Delete = "delete"
-
-
+	Create = 'create'
+	Rename = 'rename'
+	Delete = 'delete'
 class FailureHandlingKind(Enum):
-    Abort = "abort"
-    Transactional = "transactional"
-    TextOnlyTransactional = "textOnlyTransactional"
-    Undo = "undo"
-
-
+	Abort = 'abort'
+	Transactional = 'transactional'
+	TextOnlyTransactional = 'textOnlyTransactional'
+	Undo = 'undo'
 class InitializeErrorCodes(Enum):
-    """Known error codes for an `InitializeErrorCodes`;"""
-
-    unknownProtocolVersion = 1
-
-
+	"""Known error codes for an `InitializeErrorCodes`;"""
+	unknownProtocolVersion = 1 
 class TextDocumentSyncKind(Enum):
-    """Defines how the host (editor) should sync document changes to the language
-    server."""
-
-    None_ = 0
-    Full = 1
-    Incremental = 2
-
-
+	"""Defines how the host (editor) should sync document changes to the language
+server."""
+	None_ = 0 
+	Full = 1 
+	Incremental = 2 
 class TextDocumentSaveReason(Enum):
-    """Represents reasons why a text document is saved."""
-
-    Manual = 1
-    AfterDelay = 2
-    FocusOut = 3
-
-
+	"""Represents reasons why a text document is saved."""
+	Manual = 1 
+	AfterDelay = 2 
+	FocusOut = 3 
 class NotebookCellKind(Enum):
-    """A notebook cell kind."""
-
-    Markup = 1
-    Code = 2
-
-
+	"""A notebook cell kind."""
+	Markup = 1 
+	Code = 2 
 class DocumentHighlightKind(Enum):
-    """A document highlight kind."""
-
-    Text = 1
-    Read = 2
-    Write = 3
-
-
+	"""A document highlight kind."""
+	Text = 1 
+	Read = 2 
+	Write = 3 
 class FoldingRangeKind(Enum):
-    """A set of predefined range kinds."""
-
-    Comment = "comment"
-    Imports = "imports"
-    Region = "region"
-
-
+	"""A set of predefined range kinds."""
+	Comment = 'comment'
+	Imports = 'imports'
+	Region = 'region'
 class SymbolKind(Enum):
-    """A symbol kind."""
-
-    File = 1
-    Module = 2
-    Namespace = 3
-    Package = 4
-    Class = 5
-    Method = 6
-    Property = 7
-    Field = 8
-    Constructor = 9
-    Enum = 10
-    Interface = 11
-    Function = 12
-    Variable = 13
-    Constant = 14
-    String = 15
-    Number = 16
-    Boolean = 17
-    Array = 18
-    Object = 19
-    Key = 20
-    Null = 21
-    EnumMember = 22
-    Struct = 23
-    Event = 24
-    Operator = 25
-    TypeParameter = 26
-
-
+	"""A symbol kind."""
+	File = 1 
+	Module = 2 
+	Namespace = 3 
+	Package = 4 
+	Class = 5 
+	Method = 6 
+	Property = 7 
+	Field = 8 
+	Constructor = 9 
+	Enum = 10 
+	Interface = 11 
+	Function = 12 
+	Variable = 13 
+	Constant = 14 
+	String = 15 
+	Number = 16 
+	Boolean = 17 
+	Array = 18 
+	Object = 19 
+	Key = 20 
+	Null = 21 
+	EnumMember = 22 
+	Struct = 23 
+	Event = 24 
+	Operator = 25 
+	TypeParameter = 26 
 class SymbolTag(Enum):
-    """Symbol tags are extra annotations that tweak the rendering of a symbol."""
-
-    Deprecated = 1
-
-
+	"""Symbol tags are extra annotations that tweak the rendering of a symbol."""
+	Deprecated = 1 
 class TokenFormat(Enum):
-    Relative = "relative"
-
-
+	Relative = 'relative'
 class InlayHintKind(Enum):
-    """Inlay hint kinds."""
-
-    Type = 1
-    Parameter = 2
-
-
+	"""Inlay hint kinds."""
+	Type = 1 
+	Parameter = 2 
 class CompletionTriggerKind(Enum):
-    """How a completion was triggered."""
-
-    Invoked = 1
-    TriggerCharacter = 2
-    TriggerForIncompleteCompletions = 3
-
-
+	"""How a completion was triggered."""
+	Invoked = 1 
+	TriggerCharacter = 2 
+	TriggerForIncompleteCompletions = 3 
 class InsertTextFormat(Enum):
-    """Defines whether the insert text in a completion item should be interpreted as
-    plain text or a snippet."""
-
-    PlainText = 1
-    Snippet = 2
-
-
+	"""Defines whether the insert text in a completion item should be interpreted as
+plain text or a snippet."""
+	PlainText = 1 
+	Snippet = 2 
 class CompletionItemTag(Enum):
-    """Completion item tags are extra annotations that tweak the rendering of a
-    completion item."""
-
-    Deprecated = 1
-
-
+	"""Completion item tags are extra annotations that tweak the rendering of a
+completion item."""
+	Deprecated = 1 
 class InsertTextMode(Enum):
-    """How whitespace and indentation is handled during completion
-    item insertion."""
-
-    asIs = 1
-    adjustIndentation = 2
-
-
+	"""How whitespace and indentation is handled during completion
+item insertion."""
+	asIs = 1 
+	adjustIndentation = 2 
 class ApplyKind(Enum):
-    """Defines how values from a set of defaults and an individual item will be
-    merged."""
-
-    Replace = 1
-    Merge = 2
-
-
+	"""Defines how values from a set of defaults and an individual item will be
+merged."""
+	Replace = 1 
+	Merge = 2 
 class CompletionItemKind(Enum):
-    """The kind of a completion entry."""
-
-    Text = 1
-    Method = 2
-    Function = 3
-    Constructor = 4
-    Field = 5
-    Variable = 6
-    Class = 7
-    Interface = 8
-    Module = 9
-    Property = 10
-    Unit = 11
-    Value = 12
-    Enum = 13
-    Keyword = 14
-    Snippet = 15
-    Color = 16
-    File = 17
-    Reference = 18
-    Folder = 19
-    EnumMember = 20
-    Constant = 21
-    Struct = 22
-    Event = 23
-    Operator = 24
-    TypeParameter = 25
-
-
+	"""The kind of a completion entry."""
+	Text = 1 
+	Method = 2 
+	Function = 3 
+	Constructor = 4 
+	Field = 5 
+	Variable = 6 
+	Class = 7 
+	Interface = 8 
+	Module = 9 
+	Property = 10 
+	Unit = 11 
+	Value = 12 
+	Enum = 13 
+	Keyword = 14 
+	Snippet = 15 
+	Color = 16 
+	File = 17 
+	Reference = 18 
+	Folder = 19 
+	EnumMember = 20 
+	Constant = 21 
+	Struct = 22 
+	Event = 23 
+	Operator = 24 
+	TypeParameter = 25 
 class DocumentDiagnosticReportKind(Enum):
-    """The document diagnostic report kinds."""
-
-    Full = "full"
-    Unchanged = "unchanged"
-
-
+	"""The document diagnostic report kinds."""
+	Full = 'full'
+	Unchanged = 'unchanged'
 class SignatureHelpTriggerKind(Enum):
-    """How a signature help was triggered."""
-
-    Invoked = 1
-    TriggerCharacter = 2
-    ContentChange = 3
-
-
+	"""How a signature help was triggered."""
+	Invoked = 1 
+	TriggerCharacter = 2 
+	ContentChange = 3 
 class CodeActionKind(Enum):
-    """A set of predefined code action kinds."""
-
-    Empty = ""
-    QuickFix = "quickfix"
-    Refactor = "refactor"
-    RefactorExtract = "refactor.extract"
-    RefactorInline = "refactor.inline"
-    RefactorMove = "refactor.move"
-    RefactorRewrite = "refactor.rewrite"
-    Source = "source"
-    SourceOrganizeImports = "source.organizeImports"
-    SourceFixAll = "source.fixAll"
-    Notebook = "notebook"
-
-
+	"""A set of predefined code action kinds."""
+	Empty = ''
+	QuickFix = 'quickfix'
+	Refactor = 'refactor'
+	RefactorExtract = 'refactor.extract'
+	RefactorInline = 'refactor.inline'
+	RefactorMove = 'refactor.move'
+	RefactorRewrite = 'refactor.rewrite'
+	Source = 'source'
+	SourceOrganizeImports = 'source.organizeImports'
+	SourceFixAll = 'source.fixAll'
+	Notebook = 'notebook'
 class CodeActionTriggerKind(Enum):
-    """The reason why code actions were requested."""
-
-    Invoked = 1
-    Automatic = 2
-
-
+	"""The reason why code actions were requested."""
+	Invoked = 1 
+	Automatic = 2 
 class CodeActionTag(Enum):
-    """Code action tags are extra annotations that tweak the behavior of a code action."""
-
-    LLMGenerated = 1
-
-
+	"""Code action tags are extra annotations that tweak the behavior of a code action."""
+	LLMGenerated = 1 
 class PrepareSupportDefaultBehavior(Enum):
-    Identifier = 1
-
-
+	Identifier = 1 
 class InlineCompletionTriggerKind(Enum):
-    """[object Object],[object Object],[object Object]"""
-
-    Invoked = 1
-    Automatic = 2
-
-
+	"""[object Object],[object Object],[object Object]"""
+	Invoked = 1 
+	Automatic = 2 
 class FileOperationPatternKind(Enum):
-    """A pattern kind describing if a glob pattern matches a file,
-    a folder, or both."""
-
-    file = "file"
-    folder = "folder"
-
-
+	"""A pattern kind describing if a glob pattern matches a file,
+a folder, or both."""
+	file = 'file'
+	folder = 'folder'
 class WatchKind(Enum):
-    Create = 1
-    Change = 2
-    Delete = 4
-
-
+	Create = 1 
+	Change = 2 
+	Delete = 4 
 class FileChangeType(Enum):
-    """The file event type."""
-
-    Created = 1
-    Changed = 2
-    Deleted = 3
-
-
+	"""The file event type."""
+	Created = 1 
+	Changed = 2 
+	Deleted = 3 
 class MessageType(Enum):
-    Error = 1
-    Warning = 2
-    Info = 3
-    Log = 4
-    Debug = 5
-
-
+	Error = 1 
+	Warning = 2 
+	Info = 3 
+	Log = 4 
+	Debug = 5 
 type LSPAny = LSPObject | LSPArray | str | integer | uinteger | decimal | bool | None
-type LSPObject = Dict[str, LSPAny]
+type LSPObject = Dict[str,LSPAny]
 type LSPArray = list[LSPAny]
 type ProgressToken = integer | str
 type DocumentUri = str
 type URI = str
 type Pattern = str
 type GlobPattern = Pattern | RelativePattern
-
-
 @dataclass
 class TextDocumentFilterLanguage:
-    language: str
-    scheme: str
-    pattern: GlobPattern
-
-
+	language: str
+	scheme: str
+	pattern: GlobPattern
 @dataclass
 class TextDocumentFilterScheme:
-    language: str
-    scheme: str
-    pattern: GlobPattern
-
-
+	language: str
+	scheme: str
+	pattern: GlobPattern
 @dataclass
 class TextDocumentFilterPattern:
-    language: str
-    scheme: str
-    pattern: GlobPattern
-
-
-type TextDocumentFilter = (
-    TextDocumentFilterLanguage | TextDocumentFilterScheme | TextDocumentFilterPattern
-)
+	language: str
+	scheme: str
+	pattern: GlobPattern
+type TextDocumentFilter = TextDocumentFilterLanguage | TextDocumentFilterScheme | TextDocumentFilterPattern
 type DocumentFilter = TextDocumentFilter | NotebookCellTextDocumentFilter
 type DocumentSelector = list[DocumentFilter]
 type ChangeAnnotationIdentifier = str
-
-
 @dataclass
 class LocationUriOnly:
-    uri: DocumentUri
-
-
+	uri: DocumentUri
 @dataclass
 class ChangeAnnotationsSupportOptions:
-    groupsOnLabel: bool
-
-
+	groupsOnLabel: bool
 type TraceValue = Literal["off"] | Literal["messages"] | Literal["verbose"]
-
-
 @dataclass
 class ClientInfo:
-    name: str
-    version: str
-
-
+	name: str
+	version: str
 @dataclass
 class WorkspaceClientCapabilities:
-    applyEdit: bool
-    workspaceEdit: WorkspaceEditClientCapabilities
-    didChangeConfiguration: DidChangeConfigurationClientCapabilities
-    didChangeWatchedFiles: DidChangeWatchedFilesClientCapabilities
-    symbol: WorkspaceSymbolClientCapabilities
-    executeCommand: ExecuteCommandClientCapabilities
-    workspaceFolders: bool
-    configuration: bool
-    semanticTokens: SemanticTokensWorkspaceClientCapabilities
-    codeLens: CodeLensWorkspaceClientCapabilities
-    fileOperations: FileOperationClientCapabilities
-    inlineValue: InlineValueWorkspaceClientCapabilities
-    inlayHint: InlayHintWorkspaceClientCapabilities
-    diagnostics: DiagnosticWorkspaceClientCapabilities
-    foldingRange: FoldingRangeWorkspaceClientCapabilities
-    textDocumentContent: TextDocumentContentClientCapabilities
-
-
+	applyEdit: bool
+	workspaceEdit: WorkspaceEditClientCapabilities
+	didChangeConfiguration: DidChangeConfigurationClientCapabilities
+	didChangeWatchedFiles: DidChangeWatchedFilesClientCapabilities
+	symbol: WorkspaceSymbolClientCapabilities
+	executeCommand: ExecuteCommandClientCapabilities
+	workspaceFolders: bool
+	configuration: bool
+	semanticTokens: SemanticTokensWorkspaceClientCapabilities
+	codeLens: CodeLensWorkspaceClientCapabilities
+	fileOperations: FileOperationClientCapabilities
+	inlineValue: InlineValueWorkspaceClientCapabilities
+	inlayHint: InlayHintWorkspaceClientCapabilities
+	diagnostics: DiagnosticWorkspaceClientCapabilities
+	foldingRange: FoldingRangeWorkspaceClientCapabilities
+	textDocumentContent: TextDocumentContentClientCapabilities
 @dataclass
 class StaleRequestSupportOptions:
-    cancel: bool
-    retryOnContentModified: list[str]
-
-
+	cancel: bool
+	retryOnContentModified: list[str]
 @dataclass
 class ServerInfo:
-    name: str
-    version: str
-
-
+	name: str
+	version: str
 @dataclass
 class WorkspaceOptions:
-    workspaceFolders: WorkspaceFoldersServerCapabilities
-    fileOperations: FileOperationOptions
-    textDocumentContent: (
-        TextDocumentContentOptions | TextDocumentContentRegistrationOptions
-    )
-
-
-type TextDocumentContentChangeEvent = (
-    TextDocumentContentChangePartial | TextDocumentContentChangeWholeDocument
-)
-
-
+	workspaceFolders: WorkspaceFoldersServerCapabilities
+	fileOperations: FileOperationOptions
+	textDocumentContent: TextDocumentContentOptions | TextDocumentContentRegistrationOptions
+type TextDocumentContentChangeEvent = TextDocumentContentChangePartial | TextDocumentContentChangeWholeDocument
 @dataclass
 class TextDocumentContentChangePartial:
-    range: Range
-    rangeLength: uinteger
-    text: str
-
-
+	range: Range
+	rangeLength: uinteger
+	text: str
 @dataclass
 class TextDocumentContentChangeWholeDocument:
-    text: str
-
-
+	text: str
 @dataclass
 class NotebookDocumentFilterNotebookType:
-    notebookType: str
-    scheme: str
-    pattern: GlobPattern
-
-
+	notebookType: str
+	scheme: str
+	pattern: GlobPattern
 @dataclass
 class NotebookDocumentFilterScheme:
-    notebookType: str
-    scheme: str
-    pattern: GlobPattern
-
-
+	notebookType: str
+	scheme: str
+	pattern: GlobPattern
 @dataclass
 class NotebookDocumentFilterPattern:
-    notebookType: str
-    scheme: str
-    pattern: GlobPattern
-
-
-type NotebookDocumentFilter = (
-    NotebookDocumentFilterNotebookType
-    | NotebookDocumentFilterScheme
-    | NotebookDocumentFilterPattern
-)
-
-
+	notebookType: str
+	scheme: str
+	pattern: GlobPattern
+type NotebookDocumentFilter = NotebookDocumentFilterNotebookType | NotebookDocumentFilterScheme | NotebookDocumentFilterPattern
 @dataclass
 class NotebookDocumentFilterWithNotebook:
-    notebook: str | NotebookDocumentFilter
-    cells: list[NotebookCellLanguage]
-
-
+	notebook: str | NotebookDocumentFilter
+	cells: list[NotebookCellLanguage]
 @dataclass
 class NotebookDocumentFilterWithCells:
-    notebook: str | NotebookDocumentFilter
-    cells: list[NotebookCellLanguage]
-
-
+	notebook: str | NotebookDocumentFilter
+	cells: list[NotebookCellLanguage]
 @dataclass
 class NotebookCellLanguage:
-    language: str
-
-
+	language: str
 @dataclass
 class NotebookDocumentCellChanges:
-    structure: NotebookDocumentCellChangeStructure
-    data: list[NotebookCell]
-    textContent: list[NotebookDocumentCellContentChanges]
-
-
+	structure: NotebookDocumentCellChangeStructure
+	data: list[NotebookCell]
+	textContent: list[NotebookDocumentCellContentChanges]
 @dataclass
 class NotebookDocumentCellChangeStructure:
-    array: NotebookCellArrayChange
-    didOpen: list[TextDocumentItem]
-    didClose: list[TextDocumentIdentifier]
-
-
+	array: NotebookCellArrayChange
+	didOpen: list[TextDocumentItem]
+	didClose: list[TextDocumentIdentifier]
 @dataclass
 class NotebookDocumentCellContentChanges:
-    document: VersionedTextDocumentIdentifier
-    changes: list[TextDocumentContentChangeEvent]
-
-
+	document: VersionedTextDocumentIdentifier
+	changes: list[TextDocumentContentChangeEvent]
 @dataclass
 class TypeHierarchyClientCapabilities:
-    dynamicRegistration: bool
-
-
+	dynamicRegistration: bool
 @dataclass
 class ClientCodeLensResolveOptions:
-    properties: list[str]
-
-
+	properties: list[str]
 @dataclass
 class ClientFoldingRangeKindOptions:
-    valueSet: list[FoldingRangeKind]
-
-
+	valueSet: list[FoldingRangeKind]
 @dataclass
 class ClientFoldingRangeOptions:
-    collapsedText: bool
-
-
+	collapsedText: bool
 @dataclass
 class ClientSymbolKindOptions:
-    valueSet: list[SymbolKind]
-
-
+	valueSet: list[SymbolKind]
 @dataclass
 class ClientSymbolTagOptions:
-    valueSet: list[SymbolTag]
-
-
+	valueSet: list[SymbolTag]
 @dataclass
 class ClientSemanticTokensRequestOptions:
-    range: bool | Empty
-    full: bool | ClientSemanticTokensRequestFullDelta
-
-
+	range: bool | Empty
+	full: bool | ClientSemanticTokensRequestFullDelta
 @dataclass
 class ClientSemanticTokensRequestFullDelta:
-    delta: bool
-
-
+	delta: bool
 @dataclass
 class SemanticTokensFullDelta:
-    delta: bool
-
-
+	delta: bool
 @dataclass
 class ClientInlayHintResolveOptions:
-    properties: list[str]
-
-
-type InlineValue = (
-    InlineValueText | InlineValueVariableLookup | InlineValueEvaluatableExpression
-)
-
-
+	properties: list[str]
+type InlineValue = InlineValueText | InlineValueVariableLookup | InlineValueEvaluatableExpression
 @dataclass
 class ClientCompletionItemOptions:
-    snippetSupport: bool
-    commitCharactersSupport: bool
-    documentationFormat: list[MarkupKind]
-    deprecatedSupport: bool
-    preselectSupport: bool
-    tagSupport: CompletionItemTagOptions
-    insertReplaceSupport: bool
-    resolveSupport: ClientCompletionItemResolveOptions
-    insertTextModeSupport: ClientCompletionItemInsertTextModeOptions
-    labelDetailsSupport: bool
-
-
+	snippetSupport: bool
+	commitCharactersSupport: bool
+	documentationFormat: list[MarkupKind]
+	deprecatedSupport: bool
+	preselectSupport: bool
+	tagSupport: CompletionItemTagOptions
+	insertReplaceSupport: bool
+	resolveSupport: ClientCompletionItemResolveOptions
+	insertTextModeSupport: ClientCompletionItemInsertTextModeOptions
+	labelDetailsSupport: bool
 @dataclass
 class CompletionItemTagOptions:
-    valueSet: list[CompletionItemTag]
-
-
+	valueSet: list[CompletionItemTag]
 @dataclass
 class ClientCompletionItemResolveOptions:
-    properties: list[str]
-
-
+	properties: list[str]
 @dataclass
 class ClientCompletionItemInsertTextModeOptions:
-    valueSet: list[InsertTextMode]
-
-
+	valueSet: list[InsertTextMode]
 @dataclass
 class ClientCompletionItemOptionsKind:
-    valueSet: list[CompletionItemKind]
-
-
+	valueSet: list[CompletionItemKind]
 @dataclass
 class ServerCompletionItemOptions:
-    labelDetailsSupport: bool
-
-
+	labelDetailsSupport: bool
 @dataclass
 class EditRangeWithInsertReplace:
-    insert: Range
-    replace: Range
-
-
+	insert: Range
+	replace: Range
 @dataclass
 class ClientDiagnosticsTagOptions:
-    valueSet: list[DiagnosticTag]
-
-
-type DocumentDiagnosticReport = (
-    RelatedFullDocumentDiagnosticReport | RelatedUnchangedDocumentDiagnosticReport
-)
-type WorkspaceDocumentDiagnosticReport = (
-    WorkspaceFullDocumentDiagnosticReport | WorkspaceUnchangedDocumentDiagnosticReport
-)
-
-
+	valueSet: list[DiagnosticTag]
+type DocumentDiagnosticReport = RelatedFullDocumentDiagnosticReport | RelatedUnchangedDocumentDiagnosticReport
+type WorkspaceDocumentDiagnosticReport = WorkspaceFullDocumentDiagnosticReport | WorkspaceUnchangedDocumentDiagnosticReport
 @dataclass
 class ClientSignatureInformationOptions:
-    documentationFormat: list[MarkupKind]
-    parameterInformation: ClientSignatureParameterInformationOptions
-    activeParameterSupport: bool
-    noActiveParameterSupport: bool
-
-
+	documentationFormat: list[MarkupKind]
+	parameterInformation: ClientSignatureParameterInformationOptions
+	activeParameterSupport: bool
+	noActiveParameterSupport: bool
 @dataclass
 class ClientSignatureParameterInformationOptions:
-    labelOffsetSupport: bool
-
-
+	labelOffsetSupport: bool
 @dataclass
 class ClientCodeActionLiteralOptions:
-    codeActionKind: ClientCodeActionKindOptions
-
-
+	codeActionKind: ClientCodeActionKindOptions
 @dataclass
 class ClientCodeActionKindOptions:
-    valueSet: list[CodeActionKind]
-
-
+	valueSet: list[CodeActionKind]
 @dataclass
 class ClientCodeActionResolveOptions:
-    properties: list[str]
-
-
+	properties: list[str]
 @dataclass
 class CodeActionTagOptions:
-    valueSet: list[CodeActionTag]
-
-
+	valueSet: list[CodeActionTag]
 @dataclass
 class PrepareRenamePlaceholder:
-    range: Range
-    placeholder: str
-
-
+	range: Range
+	placeholder: str
 @dataclass
 class PrepareRenameDefaultBehavior:
-    defaultBehavior: bool
-
-
-type PrepareRenameResult = (
-    Range | PrepareRenamePlaceholder | PrepareRenameDefaultBehavior
-)
-
-
+	defaultBehavior: bool
+type PrepareRenameResult = Range | PrepareRenamePlaceholder | PrepareRenameDefaultBehavior
 @dataclass
 class ClientSymbolResolveOptions:
-    properties: list[str]
-
-
-@dataclass
-class TextDocumentContentClientCapabilities:
-    dynamicRegistration: bool
-
-
-@dataclass
-class TextDocumentContentOptions:
-    schemes: list[str]
-
-
+	properties: list[str]
 @dataclass
 class ClientShowMessageActionItemOptions:
-    additionalPropertiesSupport: bool
+	additionalPropertiesSupport: bool

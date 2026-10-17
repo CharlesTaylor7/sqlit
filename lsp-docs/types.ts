@@ -363,7 +363,7 @@ interface TextDocumentPositionParams {
  * - `*` to match zero or more characters in a path segment
  * - `?` to match on one character in a path segment
  * - `**` to match any number of path segments, including none
- * - `{}` to group conditions (e.g. `**​/*.{ts,js}` matches all TypeScript
+ * - `{}` to group conditions (e.g. `*.{ts,js}` matches all TypeScript
  *   and JavaScript files)
  * - `[]` to declare a range of characters to match in a path segment
  *   (e.g., `example.[0-9]` to match on `example.0`, `example.1`, …)
@@ -7704,7 +7704,7 @@ export interface ApplyWorkspaceEditResult {
  *
  * @since 3.18.0
  */
-export type TextDocumentContentClientCapabilities = {
+export interface TextDocumentContentClientCapabilities {
 	/**
 	 * Text document content provider supports dynamic registration.
 	 */
@@ -7715,7 +7715,7 @@ export type TextDocumentContentClientCapabilities = {
  *
  * @since 3.18.0
  */
-export type TextDocumentContentOptions = {
+export interface TextDocumentContentOptions {
 	/**
 	 * The schemes for which the server provides content.
 	 */
