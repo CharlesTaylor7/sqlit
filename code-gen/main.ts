@@ -1,5 +1,5 @@
 // https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API
-import ts, { NamespaceDeclaration, TypeAliasDeclaration} from "typescript";
+import ts from "typescript";
 // https://nodejs.org/docs/latest/api/fs.html
 import fs from "node:fs";
 // https://cheerio.js.org/docs/intro/
@@ -15,15 +15,24 @@ interface Handler {
 
 type DataType = Dict | DataClass;
 interface Dict {
-  kind: "dict"
+  kind: "dict";
   key: string;
   value: string;
 }
 
+interface Context {
+  fileHandle: number;
+  // dataclasses by name
+  dataClasses: Record<string, DataClass>;
+  // Handlers by Parameter class name
+  handlers: Record<string, Handler>;
+}
 interface DataClass {
-  kind: "class"
-  node: ts.Node
-  fields: Field[]
+  kind: "class";
+  node: ts.Node;
+  subclasses: string[];
+  name: string;
+  fields: Field[];
 }
 
 interface Field {
@@ -82,30 +91,44 @@ class Empty():\n\tpass
   const types = "lsp-docs/types.ts";
   const target = "src/goose/generated.py";
 
-  const table = Object.fromEntries(handlers().map((c) => [c.params, c.method]));
+  const table: Record<string, Handler> = Object.fromEntries(
+    handlers().map((c) => [c.params, c]),
+  );
   const handle = fs.openSync(target, "w");
   fs.writeSync(handle, header);
 
   const program = ts.createProgram([types], {});
   const ast = program.getSourceFile(types)!;
 
-  const aliases: Record<string, TypeAliasDeclaration> = {};
-  const enums: NamespaceDeclaration[] = [];
+  const aliases: Record<string, ts.TypeAliasDeclaration> = {};
+  const interfaces: Record<string, DataClass> = {};
+  const enums: ts.NamespaceDeclaration[] = [];
   ts.forEachChild(ast, (node) => {
     if (node?.kind === undefined) return;
     if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
-      processInterface(handle, node, table);
-    }
-    // TODO we need to merge type aliases and namepsaces when the namepsace is an enum for the alias. Json wizard can handle that.
-    else if (node.kind == ts.SyntaxKind.TypeAliasDeclaration) {
-      const decl = node as TypeAliasDeclaration;
-      aliases[decl.name.escapedText as string] = decl
+      const dc = processInterface(node);
+      interfaces[dc.name] = dc;
+    } else if (node.kind == ts.SyntaxKind.TypeAliasDeclaration) {
+      const decl = node as ts.TypeAliasDeclaration;
+      aliases[decl.name.escapedText as string] = decl;
     } else if (node.kind == ts.SyntaxKind.ModuleDeclaration) {
-      enums.push(node as NamespaceDeclaration);
+      enums.push(node as ts.NamespaceDeclaration);
     } else {
       return;
     }
   });
+  const ctx: Context = {
+    fileHandle: handle,
+    dataClasses: interfaces,
+    handlers: table,
+  };
+  for (const dc of Object.values(interfaces)) {
+    writeDataClass(ctx, dc);
+  }
+  // reorder dc class fields putting optional last
+  // merge dc classes that have subclasses
+  // merge dataclasses together
+  // come up with a list of
 
   for (const node of enums) {
     // enum trumps alias
@@ -117,7 +140,78 @@ class Empty():\n\tpass
   }
 }
 
-function processAlias(handle: number, node: TypeAliasDeclaration) {
+function writeDataClass(ctx: Context, dc: DataClass) {
+  for (const cls of dc.subclasses) {
+    dc.fields.push(...ctx.dataClasses[cls].fields);
+  }
+
+  dc.fields.sort((a, b) =>
+    a.optional === b.optional
+      ? a.name.localeCompare(b.name)
+      : Number(a.optional) - Number(b.optional),
+  );
+
+  if (dc.node.typeParameters) {
+    const params = dc.node.typeParameters
+      .map((p) => p.name.escapedText)
+      .join(",");
+    fs.writeSync(ctx.fileHandle, `@dataclass\nclass ${dc.name}[${params}]:\n`);
+  } else {
+    fs.writeSync(ctx.fileHandle, `@dataclass\nclass ${dc.name}:\n`);
+  }
+
+  const tag = ctx.handlers[dc.name];
+  if (tag) {
+    fs.writeSync(
+      ctx.fileHandle,
+      `\tclass Meta(JSONWizard.Meta): \n\t\ttag = '${tag}'\n`,
+    );
+  } else if (dc.node.jsDoc) {
+    fs.writeSync(ctx.fileHandle, `\t"""${node.jsDoc[0].comment}"""\n`);
+  } else if (!dc.fields.length) {
+    fs.writeSync(ctx.fileHandle, `\tpass\n`);
+  }
+
+  for (const field of dc.fields) {
+    let type;
+    try {
+      type = to_python_type_name(field.type);
+    } catch (e) {
+      if (e instanceof TypeAliasError) {
+        type = capitalize(field.name);
+        fs.writeSync(ctx.fileHandle, `\t@dataclass\n`);
+        fs.writeSync(ctx.fileHandle, `\tclass ${type}:\n`);
+        for (const member of field.type.members) {
+          const label = member.name.escapedText;
+          fs.writeSync(
+            ctx.fileHandle,
+            `\t\t${label}: ${to_python_type_name(member.type)} \n`,
+          );
+        }
+        return;
+      } else {
+        throw e;
+      }
+    }
+
+    const assignment =
+      field.name === "from"
+        ? `= Alias("from")`
+        : field.optional
+          ? "= None"
+          : "";
+
+    fs.writeSync(
+      ctx.fileHandle,
+      `\t${field.name === "from" ? "from_" : field}: ${type}${field.optional ? "| None" : ""} ${assignment}\n`,
+    );
+    if (field.comment) {
+      fs.writeSync(ctx.fileHandle, `"""${field.comment}"""`);
+    }
+  }
+}
+
+function processAlias(handle: number, node: ts.TypeAliasDeclaration) {
   // skip primitives
   if (isLowercase((node.name.escapedText as string)[0])) return;
   const alias = node.name.escapedText;
@@ -140,75 +234,23 @@ function processAlias(handle: number, node: TypeAliasDeclaration) {
   }
 }
 
-function processInterface(node): DataClass {
+function processInterface(node: any): DataClass {
   const name = node?.name?.escapedText;
-  if (node.typeParameters) {
-    const params = node.typeParameters.map((p) => p.name.escapedText).join(",");
-    fs.writeSync(handle, `@dataclass\nclass ${name}[${params}]:\n`);
-  } else if (node.heritageClauses) {
-    const subclasses = node.heritageClauses[0].types
-      .map((node) => node.expression.escapedText)
-      .join(", ");
-    fs.writeSync(handle, `@dataclass\nclass ${name}(${subclasses}):\n`);
-  } else {
-    fs.writeSync(handle, `@dataclass\nclass ${name}:\n`);
-  }
-
-  const tag = table[name];
-  if (tag) {
-    fs.writeSync(
-      handle,
-      `\tclass Meta(JSONWizard.Meta): \n\t\ttag = '${tag}'\n`,
-    );
-  } else if (node.jsDoc) {
-    fs.writeSync(handle, `\t"""${node.jsDoc[0].comment}"""\n`);
-  } else if (!node.members.length) {
-    fs.writeSync(handle, `\tpass\n`);
-  }
+  const fields: Field[] = [];
+  const subclasses: string[] = node.heritageClauses[0].types.map(
+    (node) => node.expression.escapedText,
+  );
   for (const member of node.members) {
     let field = member.name?.escapedText;
     if (!field) {
       continue;
     }
-    let type;
-    try {
-      type = to_python_type_name(member.type);
-      // TODO: reorder members so optional ones are last
-    } catch (e) {
-      if (e instanceof TypeAliasError) {
-        type = capitalize(field);
-        fs.writeSync(handle, `\t@dataclass\n`);
-        fs.writeSync(handle, `\tclass ${type}:\n`);
-        for (const member of node.type.members) {
-          const label = member.name.escapedText;
-          fs.writeSync(
-            handle,
-            `\t\t${label}: ${to_python_type_name(member.type)} \n`,
-          );
-        }
-        return;
-      } else {
-        throw e;
-      }
-    }
-
-    const optional = member.questionToken ? " | None" : "";
-
-    const assignment =
-      field === "from"
-        ? `= Alias("from")`
-        : member.questionToken
-          ? "= None"
-          : "";
-
-    fs.writeSync(
-      handle,
-      `\t${field === "from" ? "from_" : field}: ${type}${optional} ${assignment}\n`,
-    );
-    if (member.jsDoc) {
-      fs.writeSync(handle, `\t"""${member.jsDoc[0].comment}"""\n`);
-    }
+    const comment = member.jsDoc[0].comment;
+    const type = member.type;
+    const optional = !!member.questionToken;
+    fields.push({ name, type, comment, optional });
   }
+  return { kind: "class", name, node, fields, subclasses };
 }
 
 function processEnum(handle, node) {
@@ -317,13 +359,14 @@ function to_python_type_name(node: ts.TypeNode): string {
 function isLowercase(c) {
   return c === c.toLowerCase();
 }
+
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
 function identName(ident: ts.Identifier): string {
   // IDGAF about your stupid ass branded types TSC
-  return ident.escapedText as string
+  return ident.escapedText as string;
 }
 
 main();
