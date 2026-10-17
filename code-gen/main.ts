@@ -13,13 +13,6 @@ interface Handler {
   result?: string;
 }
 
-type DataType = Dict | DataClass;
-interface Dict {
-  kind: "dict";
-  key: string;
-  value: string;
-}
-
 interface Context {
   fileHandle: number;
   // dataclasses by name
@@ -28,7 +21,6 @@ interface Context {
   handlers: Record<string, Handler>;
 }
 interface DataClass {
-  kind: "class";
   node: ts.Node;
   subclasses: string[];
   name: string;
@@ -80,12 +72,11 @@ from enum import Enum
 from typing import Any, ClassVar, Dict, Literal
 
 # items we haven't implemented a parser for yet
-type TODO = Any
 type decimal = float
 type integer = int
 type uinteger = int
 @dataclass
-class Empty():\n\tpass
+class Empty:\n\tpass
 `;
 
   const types = "lsp-docs/types.ts";
@@ -373,11 +364,6 @@ function isLowercase(c) {
 
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
-}
-
-function identName(ident: ts.Identifier): string {
-  // IDGAF about your stupid ass branded types TSC
-  return ident.escapedText as string;
 }
 
 main();
