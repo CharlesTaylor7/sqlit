@@ -8,7 +8,6 @@ import json
 from dataclasses import dataclass
 from dataclass_wizard import JSONWizard
 from . import lsp
-from . import jsonrpc
 
 
 def main():
@@ -47,8 +46,8 @@ def handle_next(input: BinaryIO, output: BinaryIO):
 
         if header == b"\r\n":
             request = input.read(byte_count)
-            parsed = jsonrpc.Request.from_json(request)
-            cast(jsonrpc.Request, parsed)
+            parsed = lsp.RequestMessage.from_json(request)
+            cast(lsp.RequestMessage, parsed)
             print(parsed)
             return
 
