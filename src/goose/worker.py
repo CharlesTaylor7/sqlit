@@ -7,6 +7,8 @@ from sys import stdin, stdout
 import json
 from dataclasses import dataclass
 from dataclass_wizard import JSONWizard
+
+from goose.json import deserialize
 from . import lsp
 
 
@@ -26,7 +28,7 @@ def run_socket():
         while True:
             connection, _ = server.accept()
             with connection.makefile(mode="rwb") as io:
-                loop(io, io)  # pyright: ignore
+                loop(io, io)  # type: ignore
 
 
 def run_stdio():
@@ -46,8 +48,9 @@ def handle_next(input: BinaryIO, output: BinaryIO):
 
         if header == b"\r\n":
             request = input.read(byte_count)
-            parsed = lsp.RequestMessage.from_json(request)
-            cast(lsp.RequestMessage, parsed)
+            data = json.loads(request)
+            parsed = deserialize(lsp.RequestMessage, data)
+            parsed = deserialize(lsp.InitializeParams, parsed.params)
             print(parsed)
             return
 

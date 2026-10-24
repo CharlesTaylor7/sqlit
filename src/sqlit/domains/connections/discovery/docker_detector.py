@@ -72,7 +72,10 @@ class DockerScanProtocol(Protocol):
 
 
 def _iter_docker_detectors() -> list[tuple[str, Any]]:
-    from sqlit.domains.connections.providers.catalog import get_provider, get_supported_db_types
+    from sqlit.domains.connections.providers.catalog import (
+        get_provider,
+        get_supported_db_types,
+    )
 
     detectors: list[tuple[str, Any]] = []
     for db_type in get_supported_db_types():
@@ -90,7 +93,7 @@ def get_docker_status() -> DockerStatus:
         DockerStatus indicating the current state of Docker.
     """
     try:
-        import docker  # pyright: ignore[reportMissingModuleSource]
+        import docker  # type: ignore[reportMissingModuleSource]
     except ImportError:
         return DockerStatus.NOT_INSTALLED
 
@@ -163,7 +166,9 @@ def _get_single_mapped_host_binding(container: Any) -> tuple[str, int] | None:
         for binding in bindings:
             host_port = binding.get("HostPort")
             if host_port:
-                mapped_ports.setdefault(int(host_port), str(binding.get("HostIp") or ""))
+                mapped_ports.setdefault(
+                    int(host_port), str(binding.get("HostIp") or "")
+                )
     if len(mapped_ports) == 1:
         host_port, host_ip = next(iter(mapped_ports.items()))
         return host_ip, host_port
@@ -327,7 +332,8 @@ def _detect_containers_with_status(
                 password=password,
                 database=credentials.database,
                 status=container_status,
-                connectable=container_status == ContainerStatus.RUNNING and host_port is not None,
+                connectable=container_status == ContainerStatus.RUNNING
+                and host_port is not None,
             )
         )
 
@@ -346,7 +352,7 @@ def detect_database_containers() -> tuple[DockerStatus, list[DetectedContainer]]
         return status, []
 
     try:
-        import docker  # pyright: ignore[reportMissingModuleSource]
+        import docker  # type: ignore[reportMissingModuleSource]
 
         client = docker.from_env()
     except Exception:
@@ -408,7 +414,9 @@ def container_to_connection_config(container: DetectedContainer) -> ConnectionCo
         ),
         source="docker",
     )
-    normalize = getattr(provider.connection_factory, "normalize_docker_connection", None)
+    normalize = getattr(
+        provider.connection_factory, "normalize_docker_connection", None
+    )
     if callable(normalize):
         config = cast(ConnectionConfig, normalize(config))
     normalized = provider.config_validator.normalize(config)

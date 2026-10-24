@@ -17,7 +17,7 @@ from sqlit.domains.connections.providers.adapters.base import (
 )
 
 if TYPE_CHECKING:
-    import requests  # pyright: ignore[reportMissingModuleSource]
+    import requests  # type: ignore[reportMissingModuleSource]
 
     from sqlit.domains.connections.domain.config import ConnectionConfig
 
@@ -37,7 +37,11 @@ class D1Adapter(DatabaseAdapter):
     @classmethod
     def normalize_docker_connection(cls, config: ConnectionConfig) -> ConnectionConfig:
         endpoint = config.tcp_endpoint
-        if endpoint and endpoint.username and endpoint.host in {"", "localhost", "127.0.0.1"}:
+        if (
+            endpoint
+            and endpoint.username
+            and endpoint.host in {"", "localhost", "127.0.0.1"}
+        ):
             return config.with_endpoint(host=endpoint.username, username="")
         return config
 
@@ -46,7 +50,9 @@ class D1Adapter(DatabaseAdapter):
         return ("requests",)
 
     def _api_base_url(self) -> str:
-        return os.environ.get("D1_API_BASE_URL", "https://api.cloudflare.com").rstrip("/")
+        return os.environ.get("D1_API_BASE_URL", "https://api.cloudflare.com").rstrip(
+            "/"
+        )
 
     @property
     def name(self) -> str:
@@ -99,13 +105,21 @@ class D1Adapter(DatabaseAdapter):
         if not endpoint.database:
             raise ValueError("Database name is required for Cloudflare D1 connection.")
 
-        database_id = self._find_database_id_by_name(session, account_id, endpoint.database)
+        database_id = self._find_database_id_by_name(
+            session, account_id, endpoint.database
+        )
         if not database_id:
-            raise ConnectionError(f"Cloudflare D1 database '{endpoint.database}' not found.")
+            raise ConnectionError(
+                f"Cloudflare D1 database '{endpoint.database}' not found."
+            )
 
-        return D1Connection(session=session, account_id=account_id, database_id=database_id)
+        return D1Connection(
+            session=session, account_id=account_id, database_id=database_id
+        )
 
-    def _get_all_databases(self, session: requests.Session, account_id: str) -> list[dict[str, Any]]:
+    def _get_all_databases(
+        self, session: requests.Session, account_id: str
+    ) -> list[dict[str, Any]]:
         """Fetches all D1 databases for an account."""
         api_url = f"{self._api_base_url()}/client/v4/accounts/{account_id}/d1/database"
         response = session.get(api_url)
@@ -116,7 +130,9 @@ class D1Adapter(DatabaseAdapter):
             return []
         return [cast(dict[str, Any], item) for item in result if isinstance(item, dict)]
 
-    def _find_database_id_by_name(self, session: requests.Session, account_id: str, name: str) -> str | None:
+    def _find_database_id_by_name(
+        self, session: requests.Session, account_id: str, name: str
+    ) -> str | None:
         """Finds a D1 database's UUID by its name."""
         databases = self._get_all_databases(session, account_id)
         for db in databases:
@@ -137,11 +153,17 @@ class D1Adapter(DatabaseAdapter):
         # The result is a list containing a single result object
         data = cast(dict[str, Any], response.json())
         result_list = data.get("result", [])
-        if not isinstance(result_list, list) or not result_list or not isinstance(result_list[0], dict):
+        if (
+            not isinstance(result_list, list)
+            or not result_list
+            or not isinstance(result_list[0], dict)
+        ):
             raise RuntimeError("Unexpected D1 API response format")
         return cast(dict[str, Any], result_list[0])
 
-    def get_tables(self, conn: D1Connection, database: str | None = None) -> list[TableInfo]:
+    def get_tables(
+        self, conn: D1Connection, database: str | None = None
+    ) -> list[TableInfo]:
         """Gets tables using PRAGMA."""
         result = self._execute(conn, "PRAGMA table_list;")
         tables = []
@@ -151,11 +173,15 @@ class D1Adapter(DatabaseAdapter):
         for row in rows:
             if not isinstance(row, dict):
                 continue
-            if row.get("type") == "table" and not row.get("name", "").startswith("sqlite_"):
+            if row.get("type") == "table" and not row.get("name", "").startswith(
+                "sqlite_"
+            ):
                 tables.append((row.get("schema", ""), row.get("name", "")))
         return tables
 
-    def get_views(self, conn: D1Connection, database: str | None = None) -> list[TableInfo]:
+    def get_views(
+        self, conn: D1Connection, database: str | None = None
+    ) -> list[TableInfo]:
         """Gets views using PRAGMA."""
         result = self._execute(conn, "PRAGMA table_list;")
         views = []
@@ -170,10 +196,16 @@ class D1Adapter(DatabaseAdapter):
         return views
 
     def get_columns(
-        self, conn: D1Connection, table: str, database: str | None = None, schema: str | None = None
+        self,
+        conn: D1Connection,
+        table: str,
+        database: str | None = None,
+        schema: str | None = None,
     ) -> list[ColumnInfo]:
         """Gets table columns using PRAGMA."""
-        result = self._execute(conn, f"PRAGMA table_info({self.quote_identifier(table)});")
+        result = self._execute(
+            conn, f"PRAGMA table_info({self.quote_identifier(table)});"
+        )
         rows = result.get("results", [])
         if not isinstance(rows, list):
             return []
@@ -187,14 +219,20 @@ class D1Adapter(DatabaseAdapter):
             pk_value = col.get("pk", 0)
             is_pk = isinstance(pk_value, int) and pk_value > 0
             if isinstance(name, str) and isinstance(data_type, str):
-                cols.append(ColumnInfo(name=name, data_type=data_type, is_primary_key=is_pk))
+                cols.append(
+                    ColumnInfo(name=name, data_type=data_type, is_primary_key=is_pk)
+                )
         return cols
 
-    def get_procedures(self, conn: D1Connection, database: str | None = None) -> list[str]:
+    def get_procedures(
+        self, conn: D1Connection, database: str | None = None
+    ) -> list[str]:
         """Returns an empty list as D1 does not support stored procedures."""
         return []
 
-    def get_indexes(self, conn: D1Connection, database: str | None = None) -> list[IndexInfo]:
+    def get_indexes(
+        self, conn: D1Connection, database: str | None = None
+    ) -> list[IndexInfo]:
         """Get indexes from D1 (SQLite-compatible)."""
         # Query sqlite_master for all indexes
         result = self._execute(
@@ -207,7 +245,7 @@ class D1Adapter(DatabaseAdapter):
             "AND tbl_name NOT LIKE 'sqlite_%' "
             "AND tbl_name NOT LIKE 'd1_%' "
             "AND tbl_name NOT LIKE '_cf_%' "
-            "ORDER BY tbl_name, name"
+            "ORDER BY tbl_name, name",
         )
         rows = result.get("results", [])
         if not isinstance(rows, list):
@@ -222,7 +260,9 @@ class D1Adapter(DatabaseAdapter):
             if not isinstance(name, str) or not isinstance(tbl_name, str):
                 continue
             # Check if index is unique using PRAGMA
-            idx_result = self._execute(conn, f"PRAGMA index_list({self.quote_identifier(tbl_name)});")
+            idx_result = self._execute(
+                conn, f"PRAGMA index_list({self.quote_identifier(tbl_name)});"
+            )
             idx_rows = idx_result.get("results", [])
             is_unique = False
             if isinstance(idx_rows, list):
@@ -231,10 +271,14 @@ class D1Adapter(DatabaseAdapter):
                         unique_val = idx_info.get("unique", 0)
                         is_unique = isinstance(unique_val, int) and unique_val == 1
                         break
-            results.append(IndexInfo(name=name, table_name=tbl_name, is_unique=is_unique))
+            results.append(
+                IndexInfo(name=name, table_name=tbl_name, is_unique=is_unique)
+            )
         return results
 
-    def get_triggers(self, conn: D1Connection, database: str | None = None) -> list[TriggerInfo]:
+    def get_triggers(
+        self, conn: D1Connection, database: str | None = None
+    ) -> list[TriggerInfo]:
         """Get triggers from D1 (SQLite-compatible)."""
         result = self._execute(
             conn,
@@ -246,7 +290,7 @@ class D1Adapter(DatabaseAdapter):
             "AND tbl_name NOT LIKE 'sqlite_%' "
             "AND tbl_name NOT LIKE 'd1_%' "
             "AND tbl_name NOT LIKE '_cf_%' "
-            "ORDER BY tbl_name, name"
+            "ORDER BY tbl_name, name",
         )
         rows = result.get("results", [])
         if not isinstance(rows, list):
@@ -262,7 +306,9 @@ class D1Adapter(DatabaseAdapter):
                 results.append(TriggerInfo(name=name, table_name=tbl_name))
         return results
 
-    def get_sequences(self, conn: D1Connection, database: str | None = None) -> list[SequenceInfo]:
+    def get_sequences(
+        self, conn: D1Connection, database: str | None = None
+    ) -> list[SequenceInfo]:
         """D1/SQLite doesn't support sequences - return empty list."""
         return []
 
@@ -274,7 +320,9 @@ class D1Adapter(DatabaseAdapter):
         schema: str | None = None,
     ) -> list[ForeignKeyInfo]:
         """SQLite-compatible PRAGMA foreign_key_list over D1's HTTP query API."""
-        result = self._execute(conn, f"PRAGMA foreign_key_list({self.quote_identifier(table)});")
+        result = self._execute(
+            conn, f"PRAGMA foreign_key_list({self.quote_identifier(table)});"
+        )
         rows = result.get("results", [])
         if not isinstance(rows, list):
             return []
@@ -290,7 +338,9 @@ class D1Adapter(DatabaseAdapter):
             if not isinstance(ref_table, str) or not isinstance(from_col, str):
                 continue
             ordinal = int(seq) if isinstance(seq, int) else 0
-            referenced_column = self._resolve_referenced_column(conn, ref_table, to_col, ordinal)
+            referenced_column = self._resolve_referenced_column(
+                conn, ref_table, to_col, ordinal
+            )
             if not referenced_column:
                 continue
             out.append(
@@ -305,16 +355,24 @@ class D1Adapter(DatabaseAdapter):
             )
         return out
 
-    def _resolve_referenced_column(self, conn: D1Connection, table: str, column: Any, ordinal: int) -> str | None:
+    def _resolve_referenced_column(
+        self, conn: D1Connection, table: str, column: Any, ordinal: int
+    ) -> str | None:
         """Resolve SQLite's omitted REFERENCES column from the target primary key."""
         if isinstance(column, str) and column:
             return column
-        result = self._execute(conn, f"PRAGMA table_info({self.quote_identifier(table)});")
+        result = self._execute(
+            conn, f"PRAGMA table_info({self.quote_identifier(table)});"
+        )
         rows = result.get("results", [])
         if not isinstance(rows, list):
             return None
         primary_key_columns = sorted(
-            ((int(row.get("pk", 0)), str(row.get("name", ""))) for row in rows if isinstance(row, dict) and int(row.get("pk", 0)) > 0),
+            (
+                (int(row.get("pk", 0)), str(row.get("name", "")))
+                for row in rows
+                if isinstance(row, dict) and int(row.get("pk", 0)) > 0
+            ),
             key=lambda item: item[0],
         )
         if ordinal >= len(primary_key_columns):
@@ -343,7 +401,9 @@ class D1Adapter(DatabaseAdapter):
             other = tr.get("name", "")
             if not isinstance(other, str) or not other or other.startswith("sqlite_"):
                 continue
-            fk_result = self._execute(conn, f"PRAGMA foreign_key_list({self.quote_identifier(other)});")
+            fk_result = self._execute(
+                conn, f"PRAGMA foreign_key_list({self.quote_identifier(other)});"
+            )
             fk_rows = fk_result.get("results", [])
             if not isinstance(fk_rows, list):
                 continue
@@ -360,7 +420,9 @@ class D1Adapter(DatabaseAdapter):
                 fk_id = row.get("id")
                 seq = row.get("seq")
                 ordinal = int(seq) if isinstance(seq, int) else 0
-                referenced_column = self._resolve_referenced_column(conn, table, to_col, ordinal)
+                referenced_column = self._resolve_referenced_column(
+                    conn, table, to_col, ordinal
+                )
                 if not referenced_column:
                     continue
                 results.append(
@@ -379,7 +441,13 @@ class D1Adapter(DatabaseAdapter):
         """Quotes an identifier with double quotes."""
         return f'"{name}"'
 
-    def build_select_query(self, table: str, limit: int, database: str | None = None, schema: str | None = None) -> str:
+    def build_select_query(
+        self,
+        table: str,
+        limit: int,
+        database: str | None = None,
+        schema: str | None = None,
+    ) -> str:
         """Builds a standard SELECT ... LIMIT query."""
         return f"SELECT * FROM {self.quote_identifier(table)} LIMIT {limit}"
 

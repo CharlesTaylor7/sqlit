@@ -220,13 +220,7 @@ function writeDataClass(ctx: Context, dc: DataClass) {
     fs.writeSync(ctx.fileHandle, `@dataclass\nclass ${dc.name}:\n`);
   }
 
-  const handler = ctx.handlers[dc.name];
-  if (handler) {
-    fs.writeSync(
-      ctx.fileHandle,
-      `\tclass Meta(JSONWizard.Meta): \n\t\ttag = '${handler.method}'\n`,
-    );
-  } else if (dc.node.jsDoc) {
+  if (dc.node.jsDoc) {
     fs.writeSync(
       ctx.fileHandle,
       `\t"""${toComment(dc.node.jsDoc[0].comment)}"""\n`,
